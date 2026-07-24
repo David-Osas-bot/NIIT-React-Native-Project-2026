@@ -5,9 +5,7 @@ import CustomerNavigator from './CustomerNavigator';
 import ChefNavigator from './ChefNavigator';
 
 export default function RootNavigator() {
-  // TEMP: replace with real session/role state once auth store is built
-  const [session, setSession] = useState(null); // null | { role: 'customer' | 'chef' }
-
+  const [session, setSession] = useState(null);
   return (
     <NavigationContainer>
       {!session ? (
