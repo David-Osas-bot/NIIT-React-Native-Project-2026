@@ -1,5 +1,9 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("js-yaml");
+const fs = require("fs");
 const authRoutes = require("./routes/auth.routes");
 const profileRoutes = require("./routes/profile.routes");
 const addressRoutes = require("./routes/address.routes");
@@ -21,6 +25,10 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+const openapiDocument = YAML.load(fs.readFileSync(path.join(__dirname, "..", "openapi.yaml"), "utf8"));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiDocument));
+app.get("/api-docs.json", (req, res) => res.json(openapiDocument));
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
