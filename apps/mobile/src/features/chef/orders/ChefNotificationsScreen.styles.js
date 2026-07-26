@@ -80,4 +80,9 @@ export default StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#F0F0F0',
   },
+  errorText: {
+    textAlign: 'center',
+    color: '#E53935',
+    marginTop: 40,
+  },
 });

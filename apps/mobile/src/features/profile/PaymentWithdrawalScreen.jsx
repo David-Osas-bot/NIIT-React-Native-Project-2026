@@ -1,14 +1,31 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { styles } from './PaymentWithdrawalScreen.styles';
-
-const AVAILABLE_BALANCE = 500.0;
+import { apiRequest } from '../../api/client';
 
 export default function PaymentWithdrawalScreen({ navigation }) {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
+  const [balance, setBalance] = useState(null);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleWithdraw = () => {
+  useEffect(() => {
+    fetchBalance();
+  }, []);
+
+  const fetchBalance = async () => {
+    try {
+      const data = await apiRequest('/payments/balance');
+      setBalance(data.balance);
+    } catch (err) {
+      setError('Could not load balance');
+    } finally {
+      setLoadingBalance(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
     const numericAmount = parseFloat(amount);
 
     if (!amount || isNaN(numericAmount) || numericAmount <= 0) {
@@ -16,13 +33,25 @@ export default function PaymentWithdrawalScreen({ navigation }) {
       return;
     }
 
-    if (numericAmount > AVAILABLE_BALANCE) {
+    if (balance !== null && numericAmount > balance) {
       setError('Amount exceeds your available balance');
       return;
     }
 
     setError('');
-    navigation?.navigate('WithdrawSuccess');
+    setSubmitting(true);
+
+    try {
+      await apiRequest('/payments/withdraw', {
+        method: 'POST',
+        body: JSON.stringify({ amount: numericAmount }),
+      });
+      navigation?.navigate('WithdrawSuccess');
+    } catch (err) {
+      setError(err.message || 'Withdrawal failed');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -35,9 +64,17 @@ export default function PaymentWithdrawalScreen({ navigation }) {
       </TouchableOpacity>
 
       <Text style={styles.title}>Withdraw Funds</Text>
-      <Text style={styles.balanceText}>
-        Available Balance: <Text style={styles.balanceAmount}>${AVAILABLE_BALANCE.toFixed(2)}</Text>
-      </Text>
+
+      {loadingBalance ? (
+        <ActivityIndicator style={{ marginBottom: 30 }} />
+      ) : (
+        <Text style={styles.balanceText}>
+          Available Balance:{' '}
+          <Text style={styles.balanceAmount}>
+            ${balance !== null ? balance.toFixed(2) : '0.00'}
+          </Text>
+        </Text>
+      )}
 
       <Text style={styles.label}>Enter Amount</Text>
       <TextInput
@@ -55,12 +92,16 @@ export default function PaymentWithdrawalScreen({ navigation }) {
       <TouchableOpacity
         style={[
           styles.submitButton,
-          !amount && styles.submitButtonDisabled,
+          (!amount || submitting) && styles.submitButtonDisabled,
         ]}
         onPress={handleWithdraw}
-        disabled={!amount}
+        disabled={!amount || submitting}
       >
-        <Text style={styles.submitButtonText}>Withdraw</Text>
+        {submitting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.submitButtonText}>Withdraw</Text>
+        )}
       </TouchableOpacity>
     </View>
   );

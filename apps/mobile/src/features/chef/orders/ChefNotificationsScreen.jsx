@@ -1,42 +1,28 @@
-import { View, Text, Image, TouchableOpacity, FlatList } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import styles from './ChefNotificationsScreen.styles';
-
-const NOTIFICATIONS = [
-  {
-    id: '1',
-    name: 'Tanbir Ahmed',
-    action: 'Placed a new order',
-    time: '20 min ago',
-    avatar: 'https://i.pravatar.cc/100?img=12',
-    image: 'https://picsum.photos/seed/order1/100',
-  },
-  {
-    id: '2',
-    name: 'Salim Smith',
-    action: 'left a 5 star review',
-    time: '20 min ago',
-    avatar: 'https://i.pravatar.cc/100?img=15',
-    image: 'https://picsum.photos/seed/order2/100',
-  },
-  {
-    id: '3',
-    name: 'Royal Bengol',
-    action: 'agreed to cancel',
-    time: '20 min ago',
-    avatar: 'https://i.pravatar.cc/100?img=33',
-    image: 'https://picsum.photos/seed/order3/100',
-  },
-  {
-    id: '4',
-    name: 'Pabel Vuiya',
-    action: 'Placed a new order',
-    time: '20 min ago',
-    avatar: 'https://i.pravatar.cc/100?img=51',
-    image: 'https://picsum.photos/seed/order4/100',
-  },
-];
+import { apiRequest } from '../../../api/client';
 
 export default function ChefNotificationsScreen({ navigation }) {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await apiRequest('/notifications');
+      setNotifications(data.notifications || []);
+    } catch (err) {
+      setError('Could not load notifications');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -54,27 +40,35 @@ export default function ChefNotificationsScreen({ navigation }) {
           <Text style={[styles.tabText, styles.tabTextActive]}>Notifications</Text>
         </View>
         <View style={styles.tab}>
-          <Text style={styles.tabText}>Messages (3)</Text>
+          <Text style={styles.tabText}>Messages</Text>
         </View>
       </View>
 
-      <FlatList
-        data={NOTIFICATIONS}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.notificationRow}>
-            <Image source={{ uri: item.avatar }} style={styles.avatar} />
-            <View style={styles.textWrapper}>
-              <Text style={styles.notificationText}>
-                <Text style={styles.nameBold}>{item.name} </Text>
-                {item.action}
-              </Text>
-              <Text style={styles.timeText}>{item.time}</Text>
+      {loading ? (
+        <ActivityIndicator style={{ marginTop: 40 }} />
+      ) : error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        <FlatList
+          data={notifications}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <View style={styles.notificationRow}>
+              <View style={styles.textWrapper}>
+                <Text style={styles.notificationText}>
+                  <Text style={styles.nameBold}>{item.title} </Text>
+                  {item.body}
+                </Text>
+              </View>
             </View>
-            <Image source={{ uri: item.image }} style={styles.thumbnail} />
-          </View>
-        )}
-      />
+          )}
+          ListEmptyComponent={
+            <Text style={{ textAlign: 'center', color: '#999', marginTop: 40 }}>
+              No notifications yet
+            </Text>
+          }
+        />
+      )}
     </View>
   );
 }
