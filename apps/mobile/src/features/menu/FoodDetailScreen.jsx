@@ -1,20 +1,19 @@
-// import { View } from 'react-native';
-// import styles from './FoodDetailScreen.styles';
-
-// export default function FoodDetailScreen() {
-//   return <View style={styles.container} />;
-// }
-
-
-
-
-
-
-
-import { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons, Feather, FontAwesome5 } from '@expo/vector-icons';
 import styles from './FoodDetailScreen.styles';
+import { useEffect, useState } from 'react';
+import { apiRequest } from '../../shared/api';
+
+// inside the component, replace the hardcoded `food` object:
+const [food, setFood] = useState(null);
+const { foodId } = route.params;
+
+useEffect(() => {
+  apiRequest(`/food/${foodId}`).then(setFood).catch(console.error);
+}, [foodId]);
+
+if (!food) return null; // or a loading spinner
+
 
 const SIZES = ['10"', '14"', '16"'];
 
