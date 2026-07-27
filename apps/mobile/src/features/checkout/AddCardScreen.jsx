@@ -9,8 +9,12 @@ export default function AddCardScreen({ navigation }) {
   const [expiryDate, setExpiryDate] = useState('');
   const [cvc, setCvc] = useState('');
 
-  const handleAddCard = () => {
-    // TODO: wire to backend endpoint — see integration step below
+  const handleAddCard = async () => {
+    await apiRequest('/payments/methods', {
+      method: 'POST',
+      body: JSON.stringify({ /* fields — see note below */ }),
+    });
+    navigation.goBack();
   };
 
   return (

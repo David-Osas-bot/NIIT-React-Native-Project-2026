@@ -1,20 +1,25 @@
-// import { View } from 'react-native';
-// import styles from './EditCartScreen.styles';
-
-// export default function EditCartScreen() {
-//   return <View style={styles.container} />;
-// }
-
-
- 
-
-
-
-
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './EditCartScreen.styles';
+import { apiRequest } from '../../shared/api';
+
+useEffect(() => {
+  apiRequest('/cart').then(setItems).catch(console.error);
+}, []);
+
+const updateQuantity = async (itemId, newQuantity) => {
+  const updatedCart = await apiRequest(`/cart/items/${itemId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ quantity: newQuantity }),
+  });
+  setItems(updatedCart.items);
+};
+
+const removeItem = async (itemId) => {
+  const updatedCart = await apiRequest(`/cart/items/${itemId}`, { method: 'DELETE' });
+  setItems(updatedCart.items);
+};
 
 export default function EditCartScreen({ navigation }) {
   // TODO: replace with real cart state (Zustand cart store) instead of local state
