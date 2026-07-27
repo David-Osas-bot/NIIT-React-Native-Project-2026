@@ -5,7 +5,7 @@ import CustomerNavigator from './CustomerNavigator';
 import ChefNavigator from './ChefNavigator';
 
 export default function RootNavigator() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState({ role: 'customer' }); // TEMP: bypass auth for testing my part
   return (
     <NavigationContainer>
       {!session ? (
