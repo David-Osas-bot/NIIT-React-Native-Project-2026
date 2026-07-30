@@ -1,26 +1,35 @@
+import axios from 'axios';
 import { getToken } from './authToken';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const api = axios.create({
+    baseURL: process.env.EXPO_PUBLIC_API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Interceptor to inject the token before every request
+api.interceptors.request.use(
+    async (config) => {
+        const token = await getToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 export async function apiRequest(path, options = {}) {
-    const token = await getToken();
-
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-    };
-
-    const response = await fetch(`${API_URL}${path}`, {
-        ...options,
-        headers,
-    });
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-        throw new Error(data?.message || `Request failed: ${response.status}`);
+    try {
+        const response = await api({
+            url: path,
+            ...options,
+        });
+        return response.data;
+    } catch (error) {
+        // Axios puts the server response in error.response
+        const message = error.response?.data?.message || error.message;
+        throw new Error(message);
     }
-
-    return data;
 }
