@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { ChevronLeft, MoreHorizontal, Star, Truck, Clock } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import MenuItemCard from './MenuItemCard';
 import CategoryPillFilter from './CategoryPillFilter';
 import FilterScreen from './FilterScreen';
@@ -90,10 +90,24 @@ const restaurants = [
 
 export default function RestaurantViewScreen() {
   const navigation = useNavigation();
-  const [activeIndex, setActiveIndex] = useState(0);
+  const route = useRoute();
+  const { restaurantName } = route.params ?? {};
+
+  const initialIndex = restaurantName
+    ? Math.max(restaurants.findIndex((r) => r.name === restaurantName), 0)
+    : 0;
+
+  const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [activeCategory, setActiveCategory] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState(null);
   const flatListRef = useRef(null);
+
+  useEffect(() => {
+    if (initialIndex > 0 && flatListRef.current) {
+      flatListRef.current.scrollToIndex({ index: initialIndex, animated: false });
+    }
+  }, []);
 
   const activeRestaurant = restaurants[activeIndex];
 
@@ -109,6 +123,9 @@ export default function RestaurantViewScreen() {
     ? activeRestaurant.menu.filter((item) => item.name.toLowerCase().includes(activeCategory.toLowerCase()))
     : activeRestaurant.menu;
 
+  // Does the currently-displayed restaurant meet the applied rating filter?
+  const meetsFilter = !appliedFilters || activeRestaurant.rating >= appliedFilters.rating;
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Image carousel */}
@@ -121,6 +138,7 @@ export default function RestaurantViewScreen() {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.id}
           onMomentumScrollEnd={onScrollEnd}
+          getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
           renderItem={({ item }) => (
             <Image source={item.coverImage} style={styles.coverImage} resizeMode="cover" />
           )}
@@ -168,6 +186,12 @@ export default function RestaurantViewScreen() {
               <Text style={styles.name}>{activeRestaurant.name}</Text>
               <Text style={styles.description}>{activeRestaurant.description}</Text>
 
+              {appliedFilters && !meetsFilter && (
+                <Text style={styles.filterWarning}>
+                  This restaurant is below your {appliedFilters.rating}+ star filter.
+                </Text>
+              )}
+
               <CategoryPillFilter
                 categories={activeRestaurant.categories}
                 activeCategory={activeCategory}
@@ -187,8 +211,7 @@ export default function RestaurantViewScreen() {
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
         onApply={(filters) => {
-          console.log('Applied filters:', filters);
-          // TODO: use these filters to actually filter the menu/restaurant list
+          setAppliedFilters(filters);
         }}
       />
     </SafeAreaView>

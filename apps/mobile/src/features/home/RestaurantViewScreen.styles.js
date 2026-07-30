@@ -74,4 +74,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
+  filterWarning: {
+    color: '#EF4444',
+    fontSize: 13,
+    fontWeight: '500',
+    paddingHorizontal: 20,
+    marginTop: 8,
+  },
 });

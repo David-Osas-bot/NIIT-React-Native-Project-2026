@@ -1,10 +1,16 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Star, Truck, Clock } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 import { styles } from './RestaurantCard.styles';
 
 export default function RestaurantCard({ restaurant }) {
+  const navigation = useNavigation();
+
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => navigation.navigate('RestaurantViewScreen', { restaurantName: restaurant.name })}
+    >
       <Image source={restaurant.image} style={styles.image} resizeMode="cover" />
 
       <Text style={styles.name}>{restaurant.name}</Text>

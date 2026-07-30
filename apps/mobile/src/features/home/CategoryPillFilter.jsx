@@ -24,4 +24,4 @@ export default function CategoryPillFilter({ categories = [], activeCategory, on
       })}
     </ScrollView>
   );
-}cd
+}
