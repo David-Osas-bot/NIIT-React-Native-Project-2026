@@ -5,7 +5,7 @@ import styles from './SocialRow.styles.js';
 
 const ICONS = [
   { name: 'logo-facebook', bg: '#3B5998' },
-  { name: 'logo-twitter', bg: '#1DA1F2' },
+  { name: 'logo-google', bg: '#1DA1F2' },
   { name: 'logo-apple', bg: '#000000' },
 ];
 const colors = {  primary: '#FF7622',

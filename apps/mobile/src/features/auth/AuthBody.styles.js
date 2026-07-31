@@ -11,5 +11,5 @@ export default StyleSheet.create({
     zIndex: 1,
   },
   flex: { flex: 1 },
-  content: { paddingHorizontal: 24, paddingTop: 28, flexGrow: 1 },
-});
+  content: { paddingHorizontal: 24, paddingTop: 28, paddingBottom: 32, flexGrow: 1 },}
+);

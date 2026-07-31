@@ -1,15 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import AuthHeader from './AuthHeader';
-import AuthBody from './AuthBody';
-import styles from './VerificationScreen.styles.js';
+import React, { useState, useRef, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import AuthHeader from "./AuthHeader";
+import AuthBody from "./AuthBody";
+import styles from "./VerificationScreen.styles.js";
+import { useAuth } from "./authContext";
+import { forgotPassword,verifyOtp } from "../../shared/auth";
 
 const CODE_LENGTH = 4;
 const RESEND_SECONDS = 50;
 
 export default function VerificationScreen({ navigation, route }) {
-  const email = route?.params?.email || 'example@gmail.com';
-  const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(''));
+  const email = route?.params?.email || "example@gmail.com";
+  const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const inputs = useRef([]);
 
@@ -20,7 +22,7 @@ export default function VerificationScreen({ navigation, route }) {
   }, [secondsLeft]);
 
   const handleChange = (text, index) => {
-    const clean = text.replace(/[^0-9]/g, '').slice(-1);
+    const clean = text.replace(/[^0-9]/g, "").slice(-1);
     const next = [...digits];
     next[index] = clean;
     setDigits(next);
@@ -31,32 +33,63 @@ export default function VerificationScreen({ navigation, route }) {
   };
 
   const handleKeyPress = (e, index) => {
-    if (e.nativeEvent.key === 'Backspace' && !digits[index] && index > 0) {
+    if (e.nativeEvent.key === "Backspace" && !digits[index] && index > 0) {
       inputs.current[index - 1]?.focus();
     }
   };
 
-  const handleResend = () => {
-    if (secondsLeft > 0) return;
-    setSecondsLeft(RESEND_SECONDS);
-    // TODO: trigger real resend once the auth store exists
+  const [error, setError] = useState("");
+
+  const handleVerify = async () => {
+    const otp = digits.join("");
+    if (otp.length !== 4) {
+      setError("Enter the 4-digit verification code.");
+      return;
+    }
+
+    try {
+      await verifyOtp(email, otp);
+
+      navigation.navigate("ResetPassword", {
+        email,
+        otp,
+      });
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleVerify = () => {
-    // TODO: wire up to real auth — destination depends on whether this
-    // came from Signup or Forgot Password, see note below
-    console.log('verify', digits.join(''));
+  const handleResend = async () => {
+    if (secondsLeft > 0) return;
+
+    try {
+      await forgotPassword(email);
+
+      setSecondsLeft(RESEND_SECONDS);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
     <View style={styles.screen}>
-      <AuthHeader navigation={navigation} title="Verification" subtitle="We have sent a code to your email">
+      <AuthHeader
+        navigation={navigation}
+        title="Verification"
+        subtitle="We have sent a code to your email"
+      >
         <Text style={styles.email}>{email}</Text>
       </AuthHeader>
 
       <AuthBody>
-        <TouchableOpacity style={styles.resendRow} onPress={handleResend} disabled={secondsLeft > 0}>
-          <Text style={styles.resendText}>{secondsLeft > 0 ? `Resend in ${secondsLeft}s` : 'Resend'}</Text>
+        <TouchableOpacity
+          style={styles.resendRow}
+          onPress={handleResend}
+          disabled={secondsLeft > 0}
+        >
+          <Text style={styles.resendText}>
+            {secondsLeft > 0 ? `Resend in ${secondsLeft}s` : "Resend"}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.codeBoxes}>

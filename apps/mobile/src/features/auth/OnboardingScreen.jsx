@@ -29,14 +29,14 @@ export default function OnboardingScreen({ navigation }) {
     }).start();
   }, []);
 
-
-  const goToSignup = () => navigation.navigate("Signup");
+  const goToRoleSelector = () => navigation.navigate("Role");
+  const goToLogin = () => navigation.navigate("Login");
 
   const handleNext = () => {
     if (!isLastSlide) {
       listRef.current?.scrollToIndex({ index: activeIndex + 1 });
     } else {
-      goToSignup();
+      goToRoleSelector();
     }
   };
 
@@ -85,7 +85,7 @@ export default function OnboardingScreen({ navigation }) {
         </TouchableOpacity>
 
         {!isLastSlide && (
-          <TouchableOpacity onPress={goToSignup}>
+          <TouchableOpacity onPress={goToRoleSelector}>
             <Text style={styles.skip}>Skip</Text>
           </TouchableOpacity>
         )}

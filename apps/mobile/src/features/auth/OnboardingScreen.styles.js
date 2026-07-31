@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 const COLORS = {
   white: '#FFFFFF',
-  primary: '#F97316',      // Orange
+  primary: '#F97316',      
   gray: '#6B7280',
   lightGray: '#D1D5DB',
   textMuted: '#6B7280',
