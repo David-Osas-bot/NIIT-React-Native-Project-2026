@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { styles } from './PaymentWithdrawalScreen.styles';
-import { apiRequest } from '../../api/client';
+import { apiRequest } from '../../shared/api';
 
 export default function PaymentWithdrawalScreen({ navigation }) {
   const [amount, setAmount] = useState('');

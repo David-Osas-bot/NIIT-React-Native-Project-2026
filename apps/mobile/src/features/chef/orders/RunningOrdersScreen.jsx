@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import styles from './RunningOrdersScreen.styles';
-import { apiRequest } from '../../../api/client';
+import { apiRequest } from '../../../shared/api';
 
 export default function RunningOrdersScreen() {
   const [orders, setOrders] = useState([]);

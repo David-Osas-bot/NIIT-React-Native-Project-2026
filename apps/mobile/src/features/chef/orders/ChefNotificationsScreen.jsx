@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import styles from './ChefNotificationsScreen.styles';
-import { apiRequest } from '../../../api/client';
+import { apiRequest } from '../../../shared/api';
 
 export default function ChefNotificationsScreen({ navigation }) {
   const [notifications, setNotifications] = useState([]);

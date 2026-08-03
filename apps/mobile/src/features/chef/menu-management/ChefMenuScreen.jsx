@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import styles from './ChefMenuScreen.styles';
-import { apiRequest } from '../../../api/client';
+import { apiRequest } from '../../../shared/api';
 
 const TABS = ['All', 'Breakfast', 'Lunch', 'Dinner'];
 
