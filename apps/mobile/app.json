@@ -15,11 +15,20 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "package": "com.anonymous.mobile"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "expo": {
+      "ios": {
+        "infoPlist": {
+          "NSLocationWhenInUseUsageDescription": "DFood uses your location to show nearby restaurants and estimate delivery times."
+        }
+      }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }
