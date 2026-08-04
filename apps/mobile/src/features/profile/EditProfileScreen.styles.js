@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+  // Container Styles
   safeArea: {
     flex: 1,
     backgroundColor: '#F2F2F7',
@@ -8,6 +9,7 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F2F2F7',
+    paddingHorizontal: 16,
   },
 
   // Loading Styles
@@ -29,11 +31,9 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
     paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    marginBottom: 8,
   },
   backButton: {
     padding: 4,
@@ -47,68 +47,70 @@ export default StyleSheet.create({
     width: 32,
   },
 
-  // Map Styles
-  mapContainer: {
-    height: 280,
-    width: '100%',
-    backgroundColor: '#E5E5EA',
+  // Profile Picture Styles
+  profilePictureContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatarWrapper: {
     position: 'relative',
-  },
-  map: {
-    flex: 1,
-  },
-  pinIndicator: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginLeft: -16,
-    marginTop: -32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  locateButton: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    backgroundColor: '#FF6B35',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#FFFFFF',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 3,
   },
-
-  // Address Display
-  addressDisplay: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
-  addressLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#8E8E93',
-    letterSpacing: 0.5,
-    marginBottom: 4,
+  avatarPlaceholder: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#FF6B35',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  addressText: {
-    fontSize: 16,
-    color: '#1C1C1E',
+  avatarPlaceholderText: {
+    fontSize: 34,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 1,
+  },
+  editIconContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FF6B35',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  changePhotoText: {
+    fontSize: 14,
+    color: '#FF6B35',
     fontWeight: '500',
+    marginTop: 8,
   },
 
   // Form Card Styles
   formCard: {
     backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
     borderRadius: 12,
     paddingVertical: 8,
     shadowColor: '#000000',
@@ -126,14 +128,20 @@ export default StyleSheet.create({
     fontWeight: '600',
     color: '#8E8E93',
     letterSpacing: 0.5,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   formInput: {
     fontSize: 16,
     color: '#1C1C1E',
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+  },
+  bioInput: {
+    minHeight: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+    textAlignVertical: 'top',
   },
   divider: {
     height: 1,
@@ -141,36 +149,9 @@ export default StyleSheet.create({
     marginHorizontal: 16,
   },
 
-  // Label Options
-  labelContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  labelOption: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    backgroundColor: '#FFFFFF',
-  },
-  labelOptionSelected: {
-    backgroundColor: '#FF6B35',
-    borderColor: '#FF6B35',
-  },
-  labelOptionText: {
-    fontSize: 14,
-    color: '#8E8E93',
-    fontWeight: '500',
-  },
-  labelOptionTextSelected: {
-    color: '#FFFFFF',
-  },
-
   // Save Button Styles
   saveButton: {
     backgroundColor: '#FF6B35',
-    marginHorizontal: 16,
     marginTop: 30,
     marginBottom: 30,
     paddingVertical: 16,
