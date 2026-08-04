@@ -167,21 +167,17 @@
 
 
 
-
-
-
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons, Feather, FontAwesome5 } from '@expo/vector-icons';
 import styles from './FoodDetailScreen.styles';
 import { apiRequest } from '../../shared/api';
 
 const SIZES = ['10"', '14"', '16"'];
-
 const INGREDIENTS = [
   { icon: 'pepper-hot', color: '#F2994A' },
   { icon: 'leaf', color: '#F2994A' },
-  { icon: 'carrot', color: '#F2994A' }, // placeholder — swap for real ingredient icons/assets later
+  { icon: 'carrot', color: '#F2994A' },
   { icon: 'cheese', color: '#F2994A' },
   { icon: 'bacon', color: '#F2994A' },
 ];
@@ -191,8 +187,9 @@ export default function FoodDetailScreen({ route, navigation }) {
 
   const [food, setFood] = useState(null);
   const [selectedSize, setSelectedSize] = useState('14"');
-  const [quantity, setQuantity] = useState(2);
+  const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     apiRequest(`/food/${foodId}`)
@@ -201,13 +198,35 @@ export default function FoodDetailScreen({ route, navigation }) {
   }, [foodId]);
 
   if (!food) {
-    return <View style={styles.container} />; // TODO: swap for a real loading spinner
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#F2994A" />
+      </View>
+    );
   }
+
+  const handleAddToCart = async () => {
+    try {
+      setIsAdding(true);
+      await apiRequest('/cart/items', {
+        method: 'POST',
+        data: {
+          foodId: food.id || foodId,
+          quantity,
+          size: selectedSize,
+        },
+      });
+      navigation.navigate('MyCart');
+    } catch (err) {
+      console.error('Failed to add item to cart:', err);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={20} color="#1A1A2E" />
@@ -216,7 +235,6 @@ export default function FoodDetailScreen({ route, navigation }) {
           <View style={{ width: 36 }} />
         </View>
 
-        {/* Image card */}
         <View style={styles.imageCard}>
           {food.imageUrl ? (
             <Image source={{ uri: food.imageUrl }} style={styles.image} resizeMode="cover" />
@@ -237,33 +255,29 @@ export default function FoodDetailScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Restaurant badge */}
         <View style={styles.restaurantBadge}>
           <Text style={styles.restaurantEmoji}>🍕</Text>
-          <Text style={styles.restaurantName}>{food.restaurantName}</Text>
+          <Text style={styles.restaurantName}>{food.restaurantName || 'Restaurant'}</Text>
         </View>
 
-        {/* Title + description */}
         <Text style={styles.title}>{food.name}</Text>
         <Text style={styles.description}>{food.description}</Text>
 
-        {/* Rating / delivery / time */}
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <Ionicons name="star" size={14} color="#F2994A" />
-            <Text style={styles.metaText}>{food.rating}</Text>
+            <Text style={styles.metaText}>{food.rating || '4.5'}</Text>
           </View>
           <View style={styles.metaItem}>
             <Feather name="truck" size={14} color="#F2994A" />
-            <Text style={styles.metaText}>{food.deliveryFee === 0 ? 'Free' : food.deliveryFee}</Text>
+            <Text style={styles.metaText}>{food.deliveryFee === 0 ? 'Free' : `$${food.deliveryFee || 0}`}</Text>
           </View>
           <View style={styles.metaItem}>
             <Feather name="clock" size={14} color="#F2994A" />
-            <Text style={styles.metaText}>{food.prepTime}</Text>
+            <Text style={styles.metaText}>{food.prepTime || '20 min'}</Text>
           </View>
         </View>
 
-        {/* Size selector */}
         <Text style={styles.sectionLabel}>SIZE</Text>
         <View style={styles.sizeRow}>
           {SIZES.map((size) => (
@@ -272,16 +286,13 @@ export default function FoodDetailScreen({ route, navigation }) {
               style={[styles.sizeCircle, selectedSize === size && styles.sizeCircleActive]}
               onPress={() => setSelectedSize(size)}
             >
-              <Text
-                style={[styles.sizeText, selectedSize === size && styles.sizeTextActive]}
-              >
+              <Text style={[styles.sizeText, selectedSize === size && styles.sizeTextActive]}>
                 {size}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Ingredients */}
         <Text style={styles.sectionLabel}>INGREDIENTS</Text>
         <View style={styles.ingredientsRow}>
           {INGREDIENTS.map((item, index) => (
@@ -292,9 +303,8 @@ export default function FoodDetailScreen({ route, navigation }) {
         </View>
       </ScrollView>
 
-      {/* Bottom bar */}
       <View style={styles.bottomBar}>
-        <Text style={styles.price}>${food.price}</Text>
+        <Text style={styles.price}>${food.price * quantity}</Text>
         <View style={styles.stepper}>
           <TouchableOpacity
             style={styles.stepperButton}
@@ -313,16 +323,13 @@ export default function FoodDetailScreen({ route, navigation }) {
       </View>
 
       <TouchableOpacity
-        style={styles.addToCartButton}
-        onPress={async () => {
-          await apiRequest('/cart/items', {
-            method: 'POST',
-            body: JSON.stringify({ foodId: food.id, quantity, size: selectedSize }),
-          });
-          navigation.navigate('MyCart');
-        }}
+        style={[styles.addToCartButton, isAdding && { opacity: 0.7 }]}
+        disabled={isAdding}
+        onPress={handleAddToCart}
       >
-        <Text style={styles.addToCartText}>ADD TO CART</Text>
+        <Text style={styles.addToCartText}>
+          {isAdding ? 'ADDING...' : 'ADD TO CART'}
+        </Text>
       </TouchableOpacity>
     </View>
   );

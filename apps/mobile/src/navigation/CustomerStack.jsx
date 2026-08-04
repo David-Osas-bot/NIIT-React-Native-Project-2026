@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../features/home/HomeScreen';
 import FoodCategoryScreen from '../features/home/FoodCategoryScreen';
@@ -18,7 +19,7 @@ const Stack = createNativeStackNavigator();
 
 export default function CustomerStack() {
   return (
-    <Stack.Navigator initialRouteName="HomeScreen">
+    <Stack.Navigator initialRouteName="FoodDetailScreen">
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="FoodCategoryScreen" component={FoodCategoryScreen} />
       <Stack.Screen name="RestaurantViewScreen" component={RestaurantViewScreen} />

@@ -1,28 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './EditCartScreen.styles';
 import { apiRequest } from '../../shared/api';
 
-useEffect(() => {
-  apiRequest('/cart').then(setItems).catch(console.error);
-}, []);
-
-const updateQuantity = async (itemId, newQuantity) => {
-  const updatedCart = await apiRequest(`/cart/items/${itemId}`, {
-    method: 'PUT',
-    body: JSON.stringify({ quantity: newQuantity }),
-  });
-  setItems(updatedCart.items);
-};
-
-const removeItem = async (itemId) => {
-  const updatedCart = await apiRequest(`/cart/items/${itemId}`, { method: 'DELETE' });
-  setItems(updatedCart.items);
-};
-
 export default function EditCartScreen({ navigation }) {
-  // TODO: replace with real cart state (Zustand cart store) instead of local state
+  // 1. Declare state hooks at top
   const [items, setItems] = useState([
     {
       id: '1',
@@ -30,7 +13,7 @@ export default function EditCartScreen({ navigation }) {
       size: '14"',
       price: 32,
       quantity: 2,
-      image: null, // TODO: require('../../../assets/food/pizza-calzone.png')
+      image: null,
     },
     {
       id: '2',
@@ -44,14 +27,48 @@ export default function EditCartScreen({ navigation }) {
 
   const deliveryAddress = '2118 Thornridge Cir. Syracuse'; // TODO: pull from profile/addresses
 
-  const updateQuantity = (id, delta) => {
+  // 2. Fetch cart on mount
+  useEffect(() => {
+    apiRequest('/cart')
+      .then((data) => {
+        if (data?.items) setItems(data.items);
+      })
+      .catch(console.error);
+  }, []);
+
+  // 3. Handlers with optimistic UI updates & API persistence
+  const updateQuantity = async (id, delta) => {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+
+    const newQuantity = Math.max(1, item.quantity + delta);
+
+    // Optimistic UI update
     setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
+      prev.map((i) => (i.id === id ? { ...i, quantity: newQuantity } : i))
     );
+
+    try {
+      const updatedCart = await apiRequest(`/cart/items/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+      if (updatedCart?.items) setItems(updatedCart.items);
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+    }
+  };
+
+  const removeItem = async (id) => {
+    // Optimistic UI removal
+    setItems((prev) => prev.filter((item) => item.id !== id));
+
+    try {
+      const updatedCart = await apiRequest(`/cart/items/${id}`, { method: 'DELETE' });
+      if (updatedCart?.items) setItems(updatedCart.items);
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+    }
   };
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -114,7 +131,7 @@ export default function EditCartScreen({ navigation }) {
         <View style={styles.addressHeaderRow}>
           <Text style={styles.addressLabel}>DELIVERY ADDRESS</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Addresses')}>
-            <Text style={styles.editLink}>EDIT</Text>2-+
+            <Text style={styles.editLink}>EDIT</Text>
           </TouchableOpacity>
         </View>
 
@@ -130,7 +147,7 @@ export default function EditCartScreen({ navigation }) {
             <Text style={styles.breakdownText}>Breakdown</Text>
             <Ionicons name="chevron-forward" size={14} color="#F2994A" />
           </TouchableOpacity>
-        </View>   
+        </View>
 
         <TouchableOpacity
           style={styles.placeOrderButton}

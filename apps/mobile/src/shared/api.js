@@ -8,7 +8,6 @@ const api = axios.create({
     },
 });
 
-// Interceptor to inject the token before every request
 api.interceptors.request.use(
     async (config) => {
         const token = await getToken();
@@ -22,13 +21,15 @@ api.interceptors.request.use(
 
 export async function apiRequest(path, options = {}) {
     try {
+        const { body, ...restOptions } = options;
         const response = await api({
             url: path,
-            ...options,
+            // Automatically map 'body' or 'data' for Axios
+            data: body ? (typeof body === 'string' ? JSON.parse(body) : body) : options.data,
+            ...restOptions,
         });
         return response.data;
     } catch (error) {
-        // Axios puts the server response in error.response
         const message = error.response?.data?.message || error.message;
         throw new Error(message);
     }
