@@ -1,7 +1,7 @@
 import { StyleSheet, Platform } from 'react-native';
 
 const COLORS = {
-  primary: '#FE724C', // Brand Orange
+  primary: '#FE724C',
   white: '#FFFFFF',
   textDark: '#1A1E26',
   textLight: '#9796A1',
@@ -9,6 +9,10 @@ const COLORS = {
   borderLine: '#F2F2F2',
   onlineGreen: '#4CD964',
   avatarBg: '#9DA8B6',
+  chefBadgeBg: '#FFE9E1',
+  chefBadgeText: '#FE724C',
+  customerBadgeBg: '#EEF0F3',
+  customerBadgeText: '#5B6472',
 };
 
 export const styles = StyleSheet.create({
@@ -21,7 +25,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 50 : 60, // Pushes header below the camera hole
+    paddingTop: Platform.OS === 'android' ? 50 : 60,
     paddingBottom: 15,
   },
   backButton: {
@@ -71,7 +75,7 @@ export const styles = StyleSheet.create({
   listContainer: {
     paddingHorizontal: 20,
     paddingVertical: 15,
-    paddingBottom: 100, // Leaves clearance for bottom nav bar
+    paddingBottom: 100,
   },
   chatCard: {
     flexDirection: 'row',
@@ -110,10 +114,37 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 6,
   },
+  nameWithRole: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+  },
   chatName: {
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.textDark,
+    marginRight: 8,
+  },
+  roleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  roleBadgeChef: {
+    backgroundColor: COLORS.chefBadgeBg,
+  },
+  roleBadgeCustomer: {
+    backgroundColor: COLORS.customerBadgeBg,
+  },
+  roleBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  roleBadgeTextChef: {
+    color: COLORS.chefBadgeText,
+  },
+  roleBadgeTextCustomer: {
+    color: COLORS.customerBadgeText,
   },
   chatTime: {
     fontSize: 12,
@@ -188,10 +219,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-  navActionPlus: {
-    fontSize: 28,
-    color: COLORS.primary,
-    fontWeight: '300',
-    marginTop: -2,
-  }
+  navActionIcon: {
+    fontSize: 20,
+  },
 });

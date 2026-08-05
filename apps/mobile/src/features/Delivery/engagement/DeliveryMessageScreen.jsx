@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
-import { styles } from './ChefMessageScreen.styles';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { styles } from './DeliveryMessageScreen.styles';
+import DeliveryBottomNav from '../DeliveryBottomNav';
 
 const BASE_URL = 'https://niit-react-native-project-2026.onrender.com';
 
-export default function ChefMessageScreen({ navigation }) {
+export default function DeliveryMessageScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('messages');
 
   const [messagesList, setMessagesList] = useState([]);
   const [notificationsList, setNotificationsList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch both conversations and notifications on mount and via polling
+  // Fetch conversations and notifications on mount, and poll every 10 seconds
   useEffect(() => {
     fetchAllData();
 
@@ -25,8 +26,7 @@ export default function ChefMessageScreen({ navigation }) {
   const fetchAllData = async (showLoader = true) => {
     try {
       if (showLoader) setLoading(true);
-      
-      // Fetch Conversations & Notifications in parallel
+
       const [convRes, notifRes] = await Promise.all([
         fetch(`${BASE_URL}/conversations`, { headers: { 'Content-Type': 'application/json' } }),
         fetch(`${BASE_URL}/notifications`, { headers: { 'Content-Type': 'application/json' } })
@@ -34,16 +34,21 @@ export default function ChefMessageScreen({ navigation }) {
 
       if (convRes.ok) {
         const convData = await convRes.json();
+        
         const formattedConversations = (convData || []).map(conv => {
-          const otherParticipant = conv.participants?.find(p => p.role !== 'chef') || conv.recipient || {};
+          // Identify the other participant (either a chef or a customer)
+          const otherParticipant = conv.participants?.find(p => p.role !== 'delivery') || conv.recipient || {};
+          
           return {
             id: conv._id || conv.id,
+            contactType: otherParticipant.role || 'customer', 
             name: otherParticipant.name || 'User',
-            role: otherParticipant.role || 'customer',
+            subtitle: otherParticipant.role === 'chef' ? 'Restaurant' : 'Customer',
             message: conv.lastMessage || 'Tap to chat',
             time: conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
             unreadCount: conv.unreadCount || 0,
-            online: true,
+            online: true, 
+            orderId: conv.order || conv.orderId || null,
           };
         });
         setMessagesList(formattedConversations);
@@ -53,40 +58,42 @@ export default function ChefMessageScreen({ navigation }) {
         const notifData = await notifRes.json();
         const formattedNotifications = (notifData || []).map(notif => ({
           id: notif._id || notif.id,
-          title: notif.title || 'Notification',
+          title: notif.title || 'Order Update',
           body: notif.body || '',
           time: notif.createdAt ? new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent',
           unread: !notif.read,
         }));
         setNotificationsList(formattedNotifications);
       }
-
     } catch (error) {
-      console.error("Error loading chef dashboard data:", error);
+      console.error("Error loading delivery inbox data:", error);
     } finally {
       if (showLoader) setLoading(false);
     }
   };
 
-  const handleOpenChat = async (conversationId, contactName, contactRole) => {
+  const handleOpenChat = async (item) => {
     try {
-      await fetch(`${BASE_URL}/conversations/${conversationId}/read`, {
+      // 1. Tell backend to mark conversation as read
+      await fetch(`${BASE_URL}/conversations/${item.id}/read`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });
 
-      setMessagesList((prev) => 
-        prev.map(chat => chat.id === conversationId ? { ...chat, unreadCount: 0 } : chat)
+      // 2. Clear unread badge locally for instant UI response
+      setMessagesList((prev) =>
+        prev.map((m) => (m.id === item.id ? { ...m, unreadCount: 0 } : m))
       );
-      
-      navigation.navigate('GlobalChatScreen', { 
-        orderId: conversationId, 
-        currentUserType: 'chef',
-        contactType: contactRole || 'customer', 
-        contactName: contactName 
+
+      // 3. Navigate to chat
+      navigation.navigate('GlobalChatScreen', {
+        currentUserType: 'delivery',
+        contactType: item.contactType, 
+        contactName: item.name,
+        orderId: item.orderId,
       });
     } catch (error) {
-      console.error("Error marking conversation as read:", error);
+      console.error("Error opening chat:", error);
     }
   };
 
@@ -124,25 +131,25 @@ export default function ChefMessageScreen({ navigation }) {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Text style={styles.backButtonText}>{'<'}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Messages & Notifications</Text>
+        <Text style={styles.headerTitle}>Messages</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'notifications' && styles.activeTab]} 
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'notifications' && styles.activeTab]}
           onPress={() => setActiveTab('notifications')}
         >
           <Text style={[styles.tabText, activeTab === 'notifications' && styles.activeTabText]}>
-            Notifications ({notificationsList.filter(n => n.unread).length})
+            Notifications {notificationsList.filter(n => n.unread).length > 0 ? `(${notificationsList.filter(n => n.unread).length})` : ''}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'messages' && styles.activeTab]} 
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'messages' && styles.activeTab]}
           onPress={() => setActiveTab('messages')}
         >
           <Text style={[styles.tabText, activeTab === 'messages' && styles.activeTabText]}>
-            Messages ({messagesList.filter(m => m.unreadCount > 0).length})
+            Messages {messagesList.filter((m) => m.unreadCount > 0).length > 0 ? `(${messagesList.filter((m) => m.unreadCount > 0).length})` : ''}
           </Text>
         </TouchableOpacity>
       </View>
@@ -153,15 +160,15 @@ export default function ChefMessageScreen({ navigation }) {
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer}>
-          
+
           {activeTab === 'messages' && (
-            messagesList.length > 0 ? (
+            messagesList.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No messages yet</Text>
+              </View>
+            ) : (
               messagesList.map((item) => (
-                <TouchableOpacity 
-                  key={item.id} 
-                  style={styles.chatCard}
-                  onPress={() => handleOpenChat(item.id, item.name, item.role)}
-                >
+                <TouchableOpacity key={item.id} style={styles.chatCard} onPress={() => handleOpenChat(item)}>
                   <View style={styles.avatarContainer}>
                     <View style={styles.avatarPlaceholder} />
                     {item.online && <View style={styles.onlineBadge} />}
@@ -169,7 +176,14 @@ export default function ChefMessageScreen({ navigation }) {
 
                   <View style={styles.chatDetails}>
                     <View style={styles.chatNameRow}>
-                      <Text style={styles.chatName}>{item.name}</Text>
+                      <View style={styles.nameWithRole}>
+                        <Text style={styles.chatName}>{item.name}</Text>
+                        <View style={[styles.roleBadge, item.contactType === 'chef' ? styles.roleBadgeChef : styles.roleBadgeCustomer]}>
+                          <Text style={[styles.roleBadgeText, item.contactType === 'chef' ? styles.roleBadgeTextChef : styles.roleBadgeTextCustomer]}>
+                            {item.contactType === 'chef' ? 'Chef' : 'Customer'}
+                          </Text>
+                        </View>
+                      </View>
                       <Text style={styles.chatTime}>{item.time}</Text>
                     </View>
 
@@ -184,10 +198,6 @@ export default function ChefMessageScreen({ navigation }) {
                   </View>
                 </TouchableOpacity>
               ))
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No messages yet</Text>
-              </View>
             )
           )}
 
@@ -202,7 +212,7 @@ export default function ChefMessageScreen({ navigation }) {
                 {notificationsList.map((notif) => (
                   <TouchableOpacity 
                     key={notif.id} 
-                    style={[styles.chatCard, { backgroundColor: notif.unread ? '#F0F8FF' : 'transparent' }]}
+                    style={[styles.chatCard, { backgroundColor: notif.unread ? '#FFF5F1' : 'transparent' }]}
                     onPress={() => handleMarkNotificationRead(notif.id)}
                   >
                     <View style={styles.chatDetails}>
@@ -223,6 +233,8 @@ export default function ChefMessageScreen({ navigation }) {
           )}
         </ScrollView>
       )}
+
+      <DeliveryBottomNav active="messages" />
     </View>
   );
 }

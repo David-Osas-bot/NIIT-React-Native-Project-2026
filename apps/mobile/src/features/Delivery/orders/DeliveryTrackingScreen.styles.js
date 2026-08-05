@@ -9,9 +9,9 @@ const COLORS = {
   textMuted: '#C4C4C4',
   bgLight: '#F3F4F6',
   white: '#FFFFFF',
-  mapPlaceholder: '#D3D8DE',
   lineColor: '#D7D7D7',
   headerDark: '#1A1E26',
+  avatarBg: '#9DA8B6',
 };
 
 export const styles = StyleSheet.create({
@@ -20,11 +20,11 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   mapContainer: {
-    ...StyleSheet.absoluteFillObject, 
+    ...StyleSheet.absoluteFillObject,
   },
   headerContainer: {
     position: 'absolute',
-    top: 50, 
+    top: 50,
     left: 20,
     right: 20,
     flexDirection: 'row',
@@ -45,6 +45,13 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  headerBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.primary,
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -55,7 +62,7 @@ export const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: height * 0.7, 
+    height: height * 0.72,
     backgroundColor: COLORS.white,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -72,39 +79,50 @@ export const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: COLORS.bgLight,
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   scrollContent: {
     paddingHorizontal: 25,
     paddingBottom: 20,
   },
-  orderSummaryContainer: {
+  destinationCard: {
     flexDirection: 'row',
-    marginBottom: 30,
+    alignItems: 'center',
+    backgroundColor: COLORS.bgLight,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 15,
   },
-  restaurantImagePlaceholder: {
-    width: 60,
-    height: 60,
+  destinationIconWrap: {
+    width: 44,
+    height: 44,
     borderRadius: 12,
-    backgroundColor: '#9DA8B6',
-    marginRight: 15,
+    backgroundColor: COLORS.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  restaurantDetails: {
-    flex: 1,
+  destinationIcon: {
+    fontSize: 20,
   },
-  restaurantName: {
-    fontSize: 18,
+  destinationName: {
+    fontSize: 15,
     fontWeight: 'bold',
     color: COLORS.textDark,
-    marginBottom: 5,
+    marginBottom: 2,
   },
-  orderDate: {
-    fontSize: 13,
+  destinationAddress: {
+    fontSize: 12,
     color: COLORS.textLight,
-    marginBottom: 10,
+  },
+  orderId: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textLight,
   },
   itemsList: {
-    marginTop: 5,
+    marginBottom: 25,
+    paddingLeft: 2,
   },
   itemText: {
     fontSize: 13,
@@ -115,34 +133,17 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.textDark,
   },
-  timeContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  timeText: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: COLORS.textDark,
-    marginBottom: 5,
-  },
-  timeLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textLight,
-    letterSpacing: 1,
-  },
   timelineContainer: {
-    paddingLeft: 5,
+    paddingLeft: 10,
+    marginBottom: 10,
   },
   timelineStep: {
     flexDirection: 'row',
-    alignItems: 'flex-start', // Ensures multi-line content anchors cleanly to the top row
-    minHeight: 50,
-    marginBottom: 10,
+    minHeight: 55,
   },
   timelineIconContainer: {
     alignItems: 'center',
-    width: 24, // Fixed column width for dots and connecting lines
+    width: 20,
     marginRight: 15,
   },
   dot: {
@@ -156,72 +157,80 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   line: {
-    width: 2,
-    height: 40, // Fixed height to bridge steps smoothly without bleeding
+    width: 1,
+    flex: 1,
     backgroundColor: COLORS.lineColor,
-    marginTop: 4,
+    marginTop: -2,
+    marginBottom: -2,
   },
   lineActive: {
     backgroundColor: COLORS.primary,
   },
   timelineText: {
-    flex: 1, // Forces long sentences to wrap inside the remaining card width safely
     fontSize: 14,
     color: COLORS.textLight,
     marginTop: -2,
-    flexWrap: 'wrap',
   },
   textActive: {
     color: COLORS.primary,
-    fontWeight: '600',
+    fontWeight: '500',
   },
-  courierContainer: {
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.textLight,
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  contactSection: {
+    marginBottom: 10,
+  },
+  contactCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 25,
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.bgLight,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 10,
   },
-  courierProfileContainer: {
+  contactProfileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  courierAvatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#E0E0E0',
-    marginRight: 15,
+  contactAvatarPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.avatarBg,
+    marginRight: 12,
   },
-  courierName: {
-    fontSize: 16,
+  contactName: {
+    fontSize: 14,
     fontWeight: 'bold',
     color: COLORS.textDark,
-    marginBottom: 4,
+    marginBottom: 3,
   },
-  courierRole: {
-    fontSize: 13,
+  contactRole: {
+    fontSize: 12,
     color: COLORS.textLight,
   },
-  courierActions: {
+  contactActions: {
     flexDirection: 'row',
   },
   callButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 8,
   },
   messageButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.primary,
@@ -229,9 +238,42 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   callIcon: {
-    fontSize: 16,
+    fontSize: 14,
   },
   messageIcon: {
-    fontSize: 16,
-  }
+    fontSize: 14,
+  },
+  actionFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 25,
+    paddingVertical: 18,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.bgLight,
+    backgroundColor: COLORS.white,
+  },
+  payoutLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.textLight,
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  payoutAmount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.textDark,
+  },
+  primaryActionButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 16,
+  },
+  primaryActionText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '700',
+  },
 });
