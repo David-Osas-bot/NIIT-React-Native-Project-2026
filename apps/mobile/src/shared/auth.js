@@ -1,5 +1,5 @@
 import { apiRequest } from "./api";
-import { setToken, clearToken } from "./AuthToken";
+import { setToken, clearToken } from "./authToken";
 
 export async function login(email, password) {
   const data = await apiRequest("/auth/login", {

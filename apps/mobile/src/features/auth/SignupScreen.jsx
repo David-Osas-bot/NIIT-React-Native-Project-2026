@@ -7,7 +7,7 @@ import styles from "./SignupScreen.styles.js";
 import { useAuth } from './authContext';
 import { isValidEmail, isValidPassword } from "./Validation";
 import api from "../../shared/api";
-import { register } from "../../shared/AuthToken.js";
+import { register } from "../../shared/authToken.js";
 
 
 const Roles = [

@@ -10,7 +10,7 @@ import {
   getCurrentUser as getCurrentUserService,
 } from "../../shared/auth";
 
-import { getToken } from "../../shared/AuthToken";
+import { getToken } from "../../shared/authToken";
 
 const AuthContext = createContext();
 

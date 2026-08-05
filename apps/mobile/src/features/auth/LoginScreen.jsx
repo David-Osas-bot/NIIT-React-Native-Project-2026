@@ -8,7 +8,7 @@ import styles from "./LoginScreen.styles.js";
 import api from "../../shared/api";
 import { useAuth } from "./authContext";
 import { isValidEmail, isValidPassword } from "./Validation";
-import { login } from "../../shared/AuthToken.js";
+import { login } from "../../shared/authToken.js";
 
 export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
