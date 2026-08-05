@@ -1,0 +1,1476 @@
+openapi: 3.0.3
+info:
+  title: NIIT Food Delivery API
+  version: 1.0.0
+  description: |
+    Backend API for the NIIT Food Delivery App (school project).
+    Three roles share this API: `customer`, `chef`, `driver` — set at registration
+    and carried in the JWT. Endpoints that require a specific role are noted below.
+servers:
+  - url: https://niit-react-native-project-2026.onrender.com/api
+    description: Production (Render)
+  - url: http://localhost:5000/api
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+  - name: Profile
+  - name: Address
+  - name: Restaurants
+  - name: Food
+  - name: Offers
+  - name: Search
+  - name: Cart
+  - name: Orders
+  - name: Payments
+  - name: Delivery
+  - name: Conversations
+  - name: Notifications
+  - name: Reviews
+  - name: Dashboard
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LatLng:
+      type: object
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [customer, chef, driver] }
+        phone: { type: string }
+        bio: { type: string }
+        avatar: { type: string }
+        location: { $ref: "#/components/schemas/LatLng" }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+
+    Address:
+      type: object
+      properties:
+        _id: { type: string }
+        owner: { type: string }
+        label: { type: string, enum: [Home, Work, Other] }
+        street: { type: string }
+        apartment: { type: string }
+        postcode: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+        isDefault: { type: boolean }
+
+    Restaurant:
+      type: object
+      properties:
+        _id: { type: string }
+        owner: { type: string }
+        name: { type: string }
+        description: { type: string }
+        cuisineTags: { type: array, items: { type: string } }
+        banner: { type: string }
+        deliveryTime: { type: string }
+        freeShipping: { type: boolean }
+        rating: { type: number }
+        isOpen: { type: boolean }
+        balance: { type: number }
+
+    FoodSize:
+      type: object
+      properties:
+        label: { type: string }
+        price: { type: number }
+
+    Food:
+      type: object
+      properties:
+        _id: { type: string }
+        restaurant: { type: string }
+        name: { type: string }
+        price: { type: number }
+        category: { type: string }
+        ingredients: { type: array, items: { type: string } }
+        description: { type: string }
+        sizes: { type: array, items: { $ref: "#/components/schemas/FoodSize" } }
+        image: { type: string }
+        isPopular: { type: boolean }
+        rating: { type: number }
+
+    Offer:
+      type: object
+      properties:
+        _id: { type: string }
+        restaurant: { type: string }
+        code: { type: string }
+        discountPercent: { type: number }
+        description: { type: string }
+        expiresAt: { type: string, format: date-time }
+        active: { type: boolean }
+
+    CartItem:
+      type: object
+      properties:
+        _id: { type: string }
+        food: { type: string }
+        restaurant: { type: string }
+        name: { type: string }
+        price: { type: number }
+        size: { type: string }
+        quantity: { type: number }
+
+    Cart:
+      type: object
+      properties:
+        _id: { type: string }
+        owner: { type: string }
+        items: { type: array, items: { $ref: "#/components/schemas/CartItem" } }
+
+    CartWithTotals:
+      type: object
+      properties:
+        cart: { $ref: "#/components/schemas/Cart" }
+        subtotal: { type: number }
+
+    OrderItem:
+      type: object
+      properties:
+        food: { type: string }
+        name: { type: string }
+        price: { type: number }
+        size: { type: string }
+        quantity: { type: number }
+
+    Order:
+      type: object
+      properties:
+        _id: { type: string }
+        customer: { type: string }
+        restaurant: { type: string }
+        items: { type: array, items: { $ref: "#/components/schemas/OrderItem" } }
+        subtotal: { type: number }
+        deliveryFee: { type: number }
+        total: { type: number }
+        status:
+          type: string
+          enum: [placed, accepted, preparing, out_for_delivery, delivered, cancelled]
+        address:
+          type: object
+          properties:
+            label: { type: string }
+            street: { type: string }
+            apartment: { type: string }
+            postcode: { type: string }
+            lat: { type: number }
+            lng: { type: number }
+        paymentMethod: { type: string, enum: [cash, card, paypal] }
+        paymentStatus: { type: string, enum: [pending, paid, failed] }
+
+    PaymentMethod:
+      type: object
+      properties:
+        _id: { type: string }
+        owner: { type: string }
+        type: { type: string, enum: [card, paypal, cash] }
+        brand: { type: string }
+        last4: { type: string }
+        cardHolderName: { type: string }
+        expiryMonth: { type: number }
+        expiryYear: { type: number }
+        isDefault: { type: boolean }
+
+    Withdrawal:
+      type: object
+      properties:
+        _id: { type: string }
+        restaurant: { type: string }
+        amount: { type: number }
+        status: { type: string, enum: [pending, completed] }
+
+    Delivery:
+      type: object
+      properties:
+        _id: { type: string }
+        order: { type: string }
+        driver: { type: string }
+        status: { type: string, enum: [assigned, picked_up, on_the_way, delivered] }
+        currentLocation: { $ref: "#/components/schemas/LatLng" }
+
+    Conversation:
+      type: object
+      properties:
+        _id: { type: string }
+        participants: { type: array, items: { type: string } }
+        order: { type: string }
+        lastMessage: { type: string }
+        lastMessageAt: { type: string, format: date-time }
+
+    Message:
+      type: object
+      properties:
+        _id: { type: string }
+        conversation: { type: string }
+        sender: { type: string }
+        text: { type: string }
+        readBy: { type: array, items: { type: string } }
+
+    Notification:
+      type: object
+      properties:
+        _id: { type: string }
+        owner: { type: string }
+        type: { type: string }
+        title: { type: string }
+        body: { type: string }
+        data: { type: object }
+        read: { type: boolean }
+
+    Review:
+      type: object
+      properties:
+        _id: { type: string }
+        customer: { type: string }
+        restaurant: { type: string }
+        food: { type: string }
+        order: { type: string }
+        rating: { type: number, minimum: 1, maximum: 5 }
+        comment: { type: string }
+
+    Dashboard:
+      type: object
+      properties:
+        restaurant:
+          type: object
+          properties:
+            id: { type: string }
+            name: { type: string }
+            balance: { type: number }
+        revenue:
+          type: object
+          properties:
+            total: { type: number }
+            today: { type: number }
+            thisWeek: { type: number }
+        orders:
+          type: object
+          properties:
+            requests: { type: number }
+            running: { type: number }
+            delivered: { type: number }
+            cancelled: { type: number }
+        popularItems:
+          type: array
+          items:
+            type: object
+            properties:
+              food: { type: string }
+              name: { type: string }
+              totalQuantity: { type: number }
+        reviews:
+          type: object
+          properties:
+            averageRating: { type: number }
+            totalReviews: { type: number }
+            recent: { type: array, items: { $ref: "#/components/schemas/Review" } }
+
+  responses:
+    Unauthorized:
+      description: Missing/invalid token
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Wrong role or not the owner of this resource
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+paths:
+  /health:
+    get:
+      tags: [Auth]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { status: { type: string } }
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Create an account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string }
+                role: { type: string, enum: [customer, chef, driver], default: customer }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { description: Missing fields }
+        "409": { description: Email already registered }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401": { description: Invalid credentials }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get the logged-in user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { user: { $ref: "#/components/schemas/User" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /profile:
+    get:
+      tags: [Profile]
+      summary: Get current user's profile
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { user: { $ref: "#/components/schemas/User" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    put:
+      tags: [Profile]
+      summary: Update current user's profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                bio: { type: string }
+                avatar: { type: string, description: "URL string — no upload endpoint yet" }
+                location: { $ref: "#/components/schemas/LatLng" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { user: { $ref: "#/components/schemas/User" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /address:
+    post:
+      tags: [Address]
+      summary: Create an address (auto-geocodes lat/lng if omitted)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [street]
+              properties:
+                label: { type: string, enum: [Home, Work, Other] }
+                street: { type: string }
+                apartment: { type: string }
+                postcode: { type: string }
+                lat: { type: number }
+                lng: { type: number }
+                isDefault: { type: boolean }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { address: { $ref: "#/components/schemas/Address" } }
+        "400": { description: Street is required }
+    get:
+      tags: [Address]
+      summary: List current user's addresses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  addresses: { type: array, items: { $ref: "#/components/schemas/Address" } }
+
+  /address/geocode:
+    get:
+      tags: [Address]
+      summary: Ad-hoc geocode lookup (for a map-picker UI)
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LatLng" }
+        "404": { description: No location found }
+
+  /address/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Address]
+      summary: Get one address
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { address: { $ref: "#/components/schemas/Address" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Address]
+      summary: Update an address
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Address" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { address: { $ref: "#/components/schemas/Address" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Address]
+      summary: Delete an address
+      responses:
+        "200": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /restaurants:
+    post:
+      tags: [Restaurants]
+      summary: Create a restaurant (chef-only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                cuisineTags: { type: array, items: { type: string } }
+                banner: { type: string }
+                deliveryTime: { type: string }
+                freeShipping: { type: boolean }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { restaurant: { $ref: "#/components/schemas/Restaurant" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    get:
+      tags: [Restaurants]
+      summary: Browse restaurants
+      security: []
+      parameters:
+        - name: open
+          in: query
+          schema: { type: string, enum: ["true"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurants: { type: array, items: { $ref: "#/components/schemas/Restaurant" } }
+
+  /restaurants/mine:
+    get:
+      tags: [Restaurants]
+      summary: Get the calling chef's own restaurant (chef-only)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { restaurant: { $ref: "#/components/schemas/Restaurant" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /restaurants/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Restaurants]
+      summary: Get a restaurant + its menu
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurant: { $ref: "#/components/schemas/Restaurant" }
+                  foods: { type: array, items: { $ref: "#/components/schemas/Food" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Restaurants]
+      summary: Update a restaurant (chef-only, owner)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Restaurant" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { restaurant: { $ref: "#/components/schemas/Restaurant" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Restaurants]
+      summary: Delete a restaurant (chef-only, owner) — also deletes its food items
+      responses:
+        "200": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /food:
+    post:
+      tags: [Food]
+      summary: Add a food item (chef-only, must own the restaurant)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [restaurantId, name, price]
+              properties:
+                restaurantId: { type: string }
+                name: { type: string }
+                price: { type: number }
+                category: { type: string }
+                ingredients: { type: array, items: { type: string } }
+                description: { type: string }
+                sizes: { type: array, items: { $ref: "#/components/schemas/FoodSize" } }
+                image: { type: string }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { food: { $ref: "#/components/schemas/Food" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    get:
+      tags: [Food]
+      summary: Browse food items
+      security: []
+      parameters:
+        - name: restaurant
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: popular
+          in: query
+          schema: { type: string, enum: ["true"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  foods: { type: array, items: { $ref: "#/components/schemas/Food" } }
+
+  /food/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Food]
+      summary: Get a food item
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { food: { $ref: "#/components/schemas/Food" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Food]
+      summary: Update a food item (chef-only, owner)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Food" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { food: { $ref: "#/components/schemas/Food" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Food]
+      summary: Delete a food item (chef-only, owner)
+      responses:
+        "200": { description: Deleted }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /offers:
+    post:
+      tags: [Offers]
+      summary: Create a promo/coupon offer (chef-only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, discountPercent]
+              properties:
+                restaurantId: { type: string, description: "Omit for a platform-wide offer" }
+                code: { type: string }
+                discountPercent: { type: number }
+                description: { type: string }
+                expiresAt: { type: string, format: date-time }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { offer: { $ref: "#/components/schemas/Offer" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    get:
+      tags: [Offers]
+      summary: List active, non-expired offers
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  offers: { type: array, items: { $ref: "#/components/schemas/Offer" } }
+
+  /offers/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Offers]
+      summary: Delete an offer (chef-only, owner if tied to a restaurant)
+      responses:
+        "200": { description: Deleted }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /search:
+    get:
+      tags: [Search]
+      summary: Keyword search across restaurants and food
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurants: { type: array, items: { $ref: "#/components/schemas/Restaurant" } }
+                  foods: { type: array, items: { $ref: "#/components/schemas/Food" } }
+        "400": { description: "q is required" }
+
+  /search/filter:
+    get:
+      tags: [Search]
+      summary: Filter restaurants/food
+      security: []
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: minRating
+          in: query
+          schema: { type: number }
+        - name: freeShipping
+          in: query
+          schema: { type: string, enum: ["true"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurants: { type: array, items: { $ref: "#/components/schemas/Restaurant" } }
+                  foods: { type: array, items: { $ref: "#/components/schemas/Food" } }
+
+  /search/suggested:
+    get:
+      tags: [Search]
+      summary: Top 5 suggested (highest-rated open) restaurants
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurants: { type: array, items: { $ref: "#/components/schemas/Restaurant" } }
+
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Get current user's cart
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CartWithTotals" }
+    delete:
+      tags: [Cart]
+      summary: Clear the cart
+      responses:
+        "200": { description: Cleared }
+
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: Add an item to the cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [foodId]
+              properties:
+                foodId: { type: string }
+                quantity: { type: number, default: 1 }
+                size: { type: string }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CartWithTotals" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cart/items/{itemId}:
+    parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Cart]
+      summary: Update item quantity (0 removes it)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { quantity: { type: number } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CartWithTotals" }
+    delete:
+      tags: [Cart]
+      summary: Remove an item
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CartWithTotals" }
+
+  /orders:
+    post:
+      tags: [Orders]
+      summary: Checkout (splits into one order per restaurant if needed)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                addressId: { type: string }
+                paymentMethod: { type: string, enum: [cash, card, paypal] }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders: { type: array, items: { $ref: "#/components/schemas/Order" } }
+        "400": { description: Cart is empty }
+    get:
+      tags: [Orders]
+      summary: Current user's order history
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [placed, accepted, preparing, out_for_delivery, delivered, cancelled] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders: { type: array, items: { $ref: "#/components/schemas/Order" } }
+
+  /orders/incoming:
+    get:
+      tags: [Orders]
+      summary: Orders for the calling chef's restaurant (chef-only)
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders: { type: array, items: { $ref: "#/components/schemas/Order" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /orders/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Orders]
+      summary: Get an order (owner customer or owning chef only)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { order: { $ref: "#/components/schemas/Order" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /orders/{id}/status:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Orders]
+      summary: Update order status (chef-only, owner)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [accepted, preparing, out_for_delivery, delivered, cancelled] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { order: { $ref: "#/components/schemas/Order" } }
+        "400": { description: Invalid status or order already finalized }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /orders/{id}/cancel:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Orders]
+      summary: Cancel an order (customer, owner, only while status is "placed")
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { order: { $ref: "#/components/schemas/Order" } }
+        "400": { description: Order can no longer be cancelled }
+
+  /payments/methods:
+    post:
+      tags: [Payments]
+      summary: Add a payment method (never stores raw card number/CVC)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type]
+              properties:
+                type: { type: string, enum: [card, paypal, cash] }
+                cardHolderName: { type: string }
+                cardNumber: { type: string, description: "Used only to derive brand/last4 — never persisted" }
+                expiryMonth: { type: number }
+                expiryYear: { type: number }
+                isDefault: { type: boolean }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { paymentMethod: { $ref: "#/components/schemas/PaymentMethod" } }
+    get:
+      tags: [Payments]
+      summary: List current user's payment methods
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paymentMethods: { type: array, items: { $ref: "#/components/schemas/PaymentMethod" } }
+
+  /payments/methods/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Payments]
+      summary: Delete a payment method
+      responses:
+        "200": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /payments/pay:
+    post:
+      tags: [Payments]
+      summary: Pay for an order (mock processor — no real gateway connected yet)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId]
+              properties: { orderId: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  transactionId: { type: string }
+                  order: { $ref: "#/components/schemas/Order" }
+        "400": { description: Order already paid }
+
+  /payments/balance:
+    get:
+      tags: [Payments]
+      summary: Get the calling chef's restaurant balance (chef-only)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { balance: { type: number } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /payments/withdraw:
+    post:
+      tags: [Payments]
+      summary: Request a withdrawal (chef-only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties: { amount: { type: number } }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  withdrawal: { $ref: "#/components/schemas/Withdrawal" }
+                  remainingBalance: { type: number }
+        "400": { description: Insufficient balance }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /delivery:
+    post:
+      tags: [Delivery]
+      summary: Assign a driver to an order (chef-only, owner of the order's restaurant)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, driverId]
+              properties:
+                orderId: { type: string }
+                driverId: { type: string }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { delivery: { $ref: "#/components/schemas/Delivery" } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /delivery/{orderId}:
+    parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Delivery]
+      summary: Get delivery status + live distance/ETA (customer, assigned driver, or owning chef)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delivery: { $ref: "#/components/schemas/Delivery" }
+                  distanceKm: { type: number }
+                  etaMinutes: { type: number }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /delivery/{orderId}/location:
+    parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Delivery]
+      summary: Update driver's live location (driver-only, must be assigned)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LatLng" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { delivery: { $ref: "#/components/schemas/Delivery" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /delivery/{orderId}/status:
+    parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Delivery]
+      summary: Update delivery status (driver-only, must be assigned)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [picked_up, on_the_way, delivered] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { delivery: { $ref: "#/components/schemas/Delivery" } }
+        "400": { description: Invalid status }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /conversations:
+    post:
+      tags: [Conversations]
+      summary: Start (or find existing) a 1:1 conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [participantId]
+              properties:
+                participantId: { type: string }
+                orderId: { type: string }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { conversation: { $ref: "#/components/schemas/Conversation" } }
+    get:
+      tags: [Conversations]
+      summary: List current user's conversations
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations: { type: array, items: { $ref: "#/components/schemas/Conversation" } }
+
+  /conversations/{id}/messages:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Conversations]
+      summary: Get message history (last 50, participant-only)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages: { type: array, items: { $ref: "#/components/schemas/Message" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [Conversations]
+      summary: Send a message (pushes chat:message + a notification to the other participant)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties: { text: { type: string } }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { message: { $ref: "#/components/schemas/Message" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /conversations/{id}/read:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Conversations]
+      summary: Mark all messages in a conversation as read
+      responses:
+        "200": { description: Marked as read }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List current user's notifications
+      parameters:
+        - name: unread
+          in: query
+          schema: { type: string, enum: ["true"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications: { type: array, items: { $ref: "#/components/schemas/Notification" } }
+
+  /notifications/{id}/read:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Notifications]
+      summary: Mark one notification as read
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { notification: { $ref: "#/components/schemas/Notification" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /notifications/read-all:
+    put:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200": { description: Marked all as read }
+
+  /reviews:
+    post:
+      tags: [Reviews]
+      summary: Submit a review for a delivered order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, rating]
+              properties:
+                orderId: { type: string }
+                foodId: { type: string }
+                rating: { type: number, minimum: 1, maximum: 5 }
+                comment: { type: string }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { review: { $ref: "#/components/schemas/Review" } }
+        "400": { description: "Order not delivered yet" }
+        "409": { description: "Order already reviewed" }
+
+  /reviews/restaurant/{restaurantId}:
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Reviews]
+      summary: List reviews for a restaurant
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews: { type: array, items: { $ref: "#/components/schemas/Review" } }
+
+  /reviews/food/{foodId}:
+    parameters:
+      - name: foodId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Reviews]
+      summary: List reviews for a food item
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews: { type: array, items: { $ref: "#/components/schemas/Review" } }
+
+  /reviews/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Reviews]
+      summary: Delete a review (owner only) — recalculates ratings
+      responses:
+        "200": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Seller dashboard aggregation (chef-only)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Dashboard" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }

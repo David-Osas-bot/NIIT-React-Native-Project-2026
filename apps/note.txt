@@ -1,0 +1,69 @@
+            All Features
+
+1. Authentication & Account
+User registration (name, email, password) — separate account types: Customer and Chef/Seller
+Email verification via OTP code
+Login (email/password) + session/token issuance
+Forgot password / reset password flow
+"Remember me" persistent session
+(Optional) Social login integration
+Logout
+2. User Profile
+Get/update profile (name, email, phone, bio, avatar image)
+Upload/change profile photo
+Location permission data (store last known location/coordinates)
+3. Address Management
+CRUD for saved addresses
+Address fields: label (Home/Work/Other), street, apartment/unit, postcode, map coordinates
+Set default/active delivery address
+4. Restaurant / Chef Management
+Restaurant (chef) profile: name, description, tags/cuisine type, rating, delivery time, free-shipping flag, banner image
+List/browse restaurants ("Open Restaurants")
+Get single restaurant detail + its menu items
+5. Food / Menu Items (Catalog)
+CRUD for food items (chef-side): name, price, category, ingredients, description, size/variant options, photo/video upload
+Category browsing (e.g. Burgers, Pizza, etc.)
+Popular/featured items listing
+Item detail retrieval (with ratings, delivery time, ingredients)
+6. Search & Discovery
+Keyword search across restaurants and food items
+Filter (by category, rating, delivery time, price, etc.)
+"Suggested restaurants" / recommendation logic
+Promotions/offers endpoint (coupon codes, discount %)
+7. Cart
+Add/update/remove cart items
+Get current cart with computed subtotal/total
+Cart persistence per user session
+8. Orders
+Create order from cart (checkout)
+Order status lifecycle (e.g. placed → accepted → preparing → out for delivery → delivered/cancelled)
+Get order history (customer side, tabbed by status)
+Get incoming order requests / running orders (chef/seller side)
+Order detail retrieval
+9. Payments
+Payment method CRUD (Cash, Visa, MasterCard, PayPal)
+Add card: card holder name, card number, expiry date, CVC (tokenized/PCI-safe storage, not raw storage)
+Process payment transaction, return success/failure
+Seller payout/withdrawal — balance tracking, withdrawal request, success confirmation
+10. Delivery & Tracking
+Assign delivery driver to order
+Real-time order/location tracking (map coordinates, ETA)
+Driver-customer voice call initiation (likely via 3rd-party VoIP API integration)
+In-app chat between customer and driver (and customer ↔ chef via Messages screen)
+11. Messaging / Chat
+Conversation threads (customer↔driver, customer↔chef)
+Send/receive messages, message history
+Read/unread status
+12. Notifications
+Push/in-app notification list per user (order updates, promos, messages)
+Mark as read
+13. Reviews & Ratings
+Submit review/rating for a restaurant or order
+Aggregate rating calculation per restaurant/food item
+Fetch reviews list (chef-side "Review Screen")
+14. Seller (Chef) Dashboard Aggregation
+Revenue summary (daily/weekly/total)
+Order requests count / running orders count
+Popular items analytics
+Reviews summary widget
+
