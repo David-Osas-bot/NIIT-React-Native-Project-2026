@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import styles from "./ChefLogin.styles.js";
+import styles from "./DriverLoginScreen.styles.js";
 
-export default function ChefHeader({ navigation }) {
+export default function DriverHeader({ navigation }) {
   return (
     <View style={styles.headerContent}>
       <View style={styles.topRow}>

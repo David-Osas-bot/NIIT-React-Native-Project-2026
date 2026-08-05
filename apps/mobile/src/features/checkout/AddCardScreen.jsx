@@ -1,4 +1,15 @@
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+=======
+import { View } from 'react-native';
+>>>>>>> auth2
+import styles from './AddCardScreen.styles';
+
+export default function AddCardScreen() {
+  return <View style={styles.container} />;
+} import { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './AddCardScreen.styles';
