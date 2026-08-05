@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View,Image, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Image, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './LocationScreen.styles.js';
 import locationImage from '../../../assets/location.png';
 
-  const colors = {
+const colors = {
   primary: '#FF7622',
   dark: '#1C1C1E',
   gray: '#94A3B8',
@@ -16,6 +16,7 @@ import locationImage from '../../../assets/location.png';
   headerDark: '#15152B',
   inputBg: '#F5F6FA',
 };
+
 export default function LocationScreen({ navigation }) {
   const [requesting, setRequesting] = useState(false);
 
@@ -23,9 +24,17 @@ export default function LocationScreen({ navigation }) {
     setRequesting(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      // TODO: where this goes next depends on where this screen sits in
-      // the nav tree — see chat notes
-      console.log('location permission:', status);
+
+      if (status === 'granted') {
+        navigation.replace('Home');
+      } else {
+        Alert.alert(
+          'Location permission needed',
+          'DFood needs location access to find nearby chefs and deliver your order. You can enable it in your device settings.'
+        );
+      }
+    } catch (err) {
+      Alert.alert('Something went wrong', err?.message ?? 'Please try again.');
     } finally {
       setRequesting(false);
     }
@@ -33,9 +42,9 @@ export default function LocationScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.imagePlaceholder} >
+      <View style={styles.imagePlaceholder}>
         <Image source={locationImage} style={styles.image} />
-        </View>
+      </View>
 
       <TouchableOpacity style={styles.button} onPress={handleAccessLocation} disabled={requesting}>
         {requesting ? (

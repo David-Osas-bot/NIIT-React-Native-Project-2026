@@ -60,18 +60,17 @@ export function AuthProvider({ children }) {
   }
 
   async function forgot(email) {
-    return forgotPassword(email);
+    return forgotPasswordService(email);   // was: forgotPassword(email)
   }
 
   async function verify(email, otp) {
-    return verifyOtp(email, otp);
+    return verifyOtpService(email, otp);   // was: verifyOtp(email, otp)
   }
 
   async function reset(email, otp, password) {
-    return resetPassword(email, otp, password);
+    return resetPasswordService(email, otp, password); // was: resetPassword(email, otp, password)
   }
 
-  
 
   return (
     <AuthContext.Provider

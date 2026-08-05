@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ChefNavigator from './ChefNavigator';
@@ -20,7 +21,7 @@ export default function RootNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="ChefTabs" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
         {/* Main Tab Navigators */}
         <Stack.Screen name="ChefTabs" component={ChefNavigator} />
         <Stack.Screen name="CustomerTabs" component={CustomerNavigator} />
