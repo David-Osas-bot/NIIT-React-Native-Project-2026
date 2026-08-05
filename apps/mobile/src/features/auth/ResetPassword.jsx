@@ -12,7 +12,7 @@ import FormField from "./FormDesign";
 
 import styles from "./ResetPassword.styles.js";
 
-import { resetPassword } from "../../shared/auth";
+import { resetPassword } from "../../shared/authToken";
 import {
   isValidPassword,
 } from "./Validation";

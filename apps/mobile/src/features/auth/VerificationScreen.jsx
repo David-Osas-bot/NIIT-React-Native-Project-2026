@@ -4,7 +4,7 @@ import AuthHeader from "./AuthHeader";
 import AuthBody from "./AuthBody";
 import styles from "./VerificationScreen.styles.js";
 import { useAuth } from "./authContext";
-import { forgotPassword,verifyOtp } from "../../shared/auth";
+import { forgotPassword,verifyOtp } from "../../shared/authToken";
 
 const CODE_LENGTH = 4;
 const RESEND_SECONDS = 50;
