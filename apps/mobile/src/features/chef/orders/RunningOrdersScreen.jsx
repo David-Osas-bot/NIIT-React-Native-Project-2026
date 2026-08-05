@@ -1,37 +1,97 @@
-import React from 'react';
-import { View, Text, SafeAreaView, StyleSheet } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import styles from './RunningOrdersScreen.styles';
+import { apiRequest } from '../../../shared/api';
 
-const RunningOrdersScreen = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Running Orders</Text>
-        <Text style={styles.subtitle}>Coming Soon</Text>
-      </View>
-    </SafeAreaView>
+export default function RunningOrdersScreen() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const data = await apiRequest('/orders/incoming');
+      setOrders(data.orders || []);
+    } catch (err) {
+      setError('Could not load running orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (orderId, status) => {
+    try {
+      await apiRequest(`/orders/${orderId}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      });
+      fetchOrders();
+    } catch (err) {
+      // silently ignore for now, no token yet anyway
+    }
+  };
+
+  // Flatten each order's items into individual rows for display
+  const rows = orders.flatMap((order) =>
+    (order.items || []).map((item, index) => ({
+      key: `${order._id}-${index}`,
+      orderId: order._id,
+      status: order.status,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      size: item.size,
+    }))
   );
-};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1C1C1E',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
-  },
-});
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{orders.length} Running Orders</Text>
 
-export default RunningOrdersScreen;
+      {loading ? (
+        <ActivityIndicator style={{ marginTop: 40 }} />
+      ) : error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        <FlatList
+          data={rows}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.infoWrapper}>
+                <Text style={styles.foodName}>{item.name}</Text>
+                <Text style={styles.orderId}>ID: {item.orderId}</Text>
+                <Text style={styles.price}>
+                  ${item.price} {item.quantity > 1 ? `x${item.quantity}` : ''}
+                </Text>
+              </View>
+              <View style={styles.actionsColumn}>
+                <TouchableOpacity
+                  style={styles.doneButton}
+                  onPress={() => handleUpdateStatus(item.orderId, 'completed')}
+                >
+                  <Text style={styles.doneButtonText}>Done</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => handleUpdateStatus(item.orderId, 'cancelled')}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+          ListEmptyComponent={
+            <Text style={{ textAlign: 'center', color: '#999', marginTop: 40 }}>
+              No running orders
+            </Text>
+          }
+        />
+      )}
+    </View>
+  );
+}
