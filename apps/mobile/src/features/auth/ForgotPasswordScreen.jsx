@@ -5,7 +5,7 @@ import AuthBody from "./AuthBody";
 import FormField from "./FormDesign";
 import styles from "./ForgotPasswordScreen.styles.js";
 import { useAuth } from "./authContext";
-import { forgotPassword } from "../../shared/auth";
+import { forgotPassword } from "../../shared/authToken";
 import { isValidEmail } from "./Validation";
 
 export default function ForgotPasswordScreen({ navigation }) {

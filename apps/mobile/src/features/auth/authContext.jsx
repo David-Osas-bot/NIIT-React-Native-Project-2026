@@ -8,9 +8,9 @@ import {
   verifyOtp as verifyOtpService,
   resetPassword as resetPasswordService,
   getCurrentUser as getCurrentUserService,
-} from "../../shared/auth";
+} from "../../shared/authToken";
 
-import { getToken } from "../../shared/AuthToken";
+import { getToken } from "../../shared/authToken";
 
 const AuthContext = createContext();
 

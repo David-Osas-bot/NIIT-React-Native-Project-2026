@@ -1,17 +1,7 @@
-<<<<<<< HEAD
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-=======
-import { View } from 'react-native';
->>>>>>> auth2
-import styles from './AddCardScreen.styles';
-
-export default function AddCardScreen() {
-  return <View style={styles.container} />;
-} import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { apiRequest } from '../../shared/api';
 import styles from './AddCardScreen.styles';
 
 export default function AddCardScreen({ navigation }) {
@@ -19,13 +9,31 @@ export default function AddCardScreen({ navigation }) {
   const [cardNumber, setCardNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvc, setCvc] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAddCard = async () => {
-    await apiRequest('/payments/methods', {
-      method: 'POST',
-      body: JSON.stringify({ /* fields — see note below */ }),
-    });
-    navigation.goBack();
+    if (!cardHolderName || !cardNumber || !expiryDate || !cvc) {
+      Alert.alert('Missing details', 'Please fill in all card fields before continuing.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await apiRequest('/payments/methods', {
+        method: 'POST',
+        data: {
+          cardHolderName,
+          cardNumber: cardNumber.replace(/\s/g, ''),
+          expiryDate,
+          cvc,
+        },
+      });
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Could not add card', error?.message ?? 'Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -96,8 +104,14 @@ export default function AddCardScreen({ navigation }) {
       </View>
 
       {/* Submit */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleAddCard}>
-        <Text style={styles.submitText}>ADD & MAKE PAYMENT</Text>
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleAddCard}
+        disabled={submitting}
+      >
+        <Text style={styles.submitText}>
+          {submitting ? 'ADDING…' : 'ADD & MAKE PAYMENT'}
+        </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );

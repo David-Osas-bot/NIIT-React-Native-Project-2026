@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ChefNavigator from './ChefNavigator';
 import CustomerNavigator from './CustomerNavigator';
 import AuthNavigator from './AuthNavigator';
-
 import HomeScreen from '../features/home/HomeScreen';
 import PersonalProfileScreen from '../features/profile/PersonalProfileScreen';
 import EditProfileScreen from '../features/profile/EditProfileScreen';
