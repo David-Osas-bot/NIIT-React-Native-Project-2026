@@ -11,7 +11,8 @@ import AddressesScreen from '../features/profile/AddressesScreen';
 import AddNewAddressScreen from '../features/profile/AddNewAddressScreen';
 import PersonalProfileScreen from '../features/profile/PersonalProfileScreen';
 import EditProfileScreen from '../features/profile/EditProfileScreen';
-
+import FoodCategoryScreen from '../features/home/FoodCategoryScreen';
+import RestaurantViewScreen from '../features/home/RestaurantViewScreen';
 const Stack = createNativeStackNavigator();
 
 // NOTE: route names below were renamed to match what the screens actually
@@ -31,6 +32,8 @@ export default function CustomerStack() {
       <Stack.Screen name="FilterScreen" component={FilterScreen} />
       <Stack.Screen name="MenuList" component={MenuListScreen} />
       <Stack.Screen name="FoodDetailScreen" component={FoodDetailScreen} />
+      <Stack.Screen name="FoodCategoryScreen" component={FoodCategoryScreen} />
+      <Stack.Screen name="RestaurantViewScreen" component={RestaurantViewScreen} />
       <Stack.Screen name="Cart" component={MyCartScreen} />
       <Stack.Screen name="EditCartScreen" component={EditCartScreen} />
       <Stack.Screen name="PaymentMethod" component={PaymentMethodScreen} />

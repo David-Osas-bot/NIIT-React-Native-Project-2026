@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './EditCartScreen.styles';
 import { apiRequest } from '../../shared/api';
@@ -73,6 +73,14 @@ export default function EditCartScreen({ navigation }) {
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#F2994A" style={{ marginTop: 40 }} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -86,6 +94,8 @@ export default function EditCartScreen({ navigation }) {
             <Text style={styles.editItemsLink}>EDIT ITEMS</Text>
           </TouchableOpacity>
         </View>
+
+        {error && <Text style={styles.errorText}>{error}</Text>}
 
         {/* Cart items */}
         {items.map((item) => (

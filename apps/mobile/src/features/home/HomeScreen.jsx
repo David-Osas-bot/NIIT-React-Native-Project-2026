@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-// import Header from './Header';
+import Header from './Header';
 import SearchBar from './SearchBar';
 import Categories from './categories';
 import RestaurantCard from './RestaurantCard';
@@ -30,6 +30,15 @@ const restaurants = [
 export default function HomeScreen() {
   const navigation = useNavigation();
 
+  // Helper to safely navigate even if HomeScreen is inside a nested Tab Navigator
+  const navigateToScreen = (screenName, params = {}) => {
+    try {
+      navigation.navigate(screenName, params);
+    } catch {
+      navigation.getParent()?.navigate(screenName, params);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -44,13 +53,19 @@ export default function HomeScreen() {
 
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Open Restaurants</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('RestaurantViewScreen')}>
+          <TouchableOpacity onPress={() => navigateToScreen('RestaurantViewScreen')}>
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
 
         {restaurants.map((r) => (
-          <RestaurantCard key={r.id} restaurant={r} />
+          <TouchableOpacity
+            key={r.id}
+            activeOpacity={0.8}
+            onPress={() => navigateToScreen('RestaurantViewScreen', { restaurant: r })}
+          >
+            <RestaurantCard restaurant={r} />
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </SafeAreaView>
