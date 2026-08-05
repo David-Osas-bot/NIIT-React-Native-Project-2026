@@ -1,60 +1,58 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './EditCartScreen.styles';
 import { apiRequest } from '../../shared/api';
 
-useEffect(() => {
-  apiRequest('/cart').then(setItems).catch(console.error);
-}, []);
-
-const updateQuantity = async (itemId, newQuantity) => {
-  const updatedCart = await apiRequest(`/cart/items/${itemId}`, {
-    method: 'PUT',
-    body: JSON.stringify({ quantity: newQuantity }),
-  });
-  setItems(updatedCart.items);
-};
-
-const removeItem = async (itemId) => {
-  const updatedCart = await apiRequest(`/cart/items/${itemId}`, { method: 'DELETE' });
-  setItems(updatedCart.items);
-};
-
 export default function EditCartScreen({ navigation }) {
-  // TODO: replace with real cart state (Zustand cart store) instead of local state
-  const [items, setItems] = useState([
-    {
-      id: '1',
-      name: 'Pizza Calzone European',
-      size: '14"',
-      price: 32,
-      quantity: 2,
-      image: null, // TODO: require('../../../assets/food/pizza-calzone.png')
-    },
-    {
-      id: '2',
-      name: 'Pizza Calzone European',
-      size: '14"',
-      price: 32,
-      quantity: 1,
-      image: null,
-    },
-  ]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const deliveryAddress = '2118 Thornridge Cir. Syracuse'; // TODO: pull from profile/addresses
 
-  const updateQuantity = (id, delta) => {
+  const loadCart = () => {
+    setLoading(true);
+    apiRequest('/cart')
+      .then((cart) => setItems(cart.items ?? []))
+      .catch((err) => setError(err?.message ?? 'Could not load cart'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadCart();
+  }, []);
+
+  const updateQuantity = async (itemId, delta) => {
+    const current = items.find((item) => item.id === itemId);
+    if (!current) return;
+    const newQuantity = Math.max(1, current.quantity + delta);
+
     setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
+      prev.map((item) => (item.id === itemId ? { ...item, quantity: newQuantity } : item))
     );
+
+    try {
+      const updatedCart = await apiRequest(`/cart/items/${itemId}`, {
+        method: 'PUT',
+        data: { quantity: newQuantity },
+      });
+      setItems(updatedCart.items ?? []);
+    } catch (err) {
+      setError(err?.message ?? 'Could not update quantity');
+      loadCart();
+    }
   };
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#F2994A" style={{ marginTop: 40 }} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -69,6 +67,8 @@ export default function EditCartScreen({ navigation }) {
             <Text style={styles.editItemsLink}>EDIT ITEMS</Text>
           </TouchableOpacity>
         </View>
+
+        {error && <Text style={styles.errorText}>{error}</Text>}
 
         {/* Cart items */}
         {items.map((item) => (
@@ -114,7 +114,7 @@ export default function EditCartScreen({ navigation }) {
         <View style={styles.addressHeaderRow}>
           <Text style={styles.addressLabel}>DELIVERY ADDRESS</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Addresses')}>
-            <Text style={styles.editLink}>EDIT</Text>2-+
+            <Text style={styles.editLink}>EDIT</Text>
           </TouchableOpacity>
         </View>
 
@@ -130,7 +130,7 @@ export default function EditCartScreen({ navigation }) {
             <Text style={styles.breakdownText}>Breakdown</Text>
             <Ionicons name="chevron-forward" size={14} color="#F2994A" />
           </TouchableOpacity>
-        </View>   
+        </View>
 
         <TouchableOpacity
           style={styles.placeOrderButton}
