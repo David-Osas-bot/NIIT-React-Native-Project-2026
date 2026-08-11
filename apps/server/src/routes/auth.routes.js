@@ -7,9 +7,9 @@ const {
   getMe,
   forgotPassword,
   resetPassword,
-} = require("../controllers/authController");
+} = require("../controllers/auth.controller");
 
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../middleware/auth");
 
 
 // Authentication
