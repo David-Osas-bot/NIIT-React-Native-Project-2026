@@ -5,10 +5,11 @@ import AuthBody from "./AuthBody";
 import FormField from "./FormDesign";
 import styles from "./ForgotPasswordScreen.styles.js";
 import { useAuth } from "./authContext";
-import { forgotPassword } from "../../shared/authToken";
+import { forgotPassword } from "../../shared/auth";
 import { isValidEmail } from "./Validation";
 
 export default function ForgotPasswordScreen({ navigation }) {
+  const { forgot } = useAuth();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 
     try {
       setError("");
-      await forgotPassword(email);
+      await forgot(email);
       navigation.navigate("Verification", {
         email,
       });
@@ -50,6 +51,7 @@ export default function ForgotPasswordScreen({ navigation }) {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!loading}
         />
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}

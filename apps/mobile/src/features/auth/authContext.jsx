@@ -8,7 +8,7 @@ import {
   verifyOtp as verifyOtpService,
   resetPassword as resetPasswordService,
   getCurrentUser as getCurrentUserService,
-} from "../../shared/authToken";
+} from "../../shared/auth";
 
 import { getToken } from "../../shared/authToken";
 
@@ -16,7 +16,6 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,13 +39,13 @@ export function AuthProvider({ children }) {
   async function login(email, password) {
     const data = await loginService(email, password);
 
-    setUser(data.user ?? { token: data.token });
+    setUser(data.user);
 
     return data;
   }
 
-  async function register(name, email, password) {
-    const data = await registerService(name, email, password);
+  async function register(name, email, password, role) {
+    const data = await registerService(name, email, password, role);
 
     setUser(data.user ?? { token: data.token });
 
@@ -60,17 +59,16 @@ export function AuthProvider({ children }) {
   }
 
   async function forgot(email) {
-    return forgotPasswordService(email);   // was: forgotPassword(email)
+    return forgotPasswordService(email);
   }
 
   async function verify(email, otp) {
-    return verifyOtpService(email, otp);   // was: verifyOtp(email, otp)
+    return verifyOtpService(email, otp);
   }
 
   async function reset(email, otp, password) {
-    return resetPasswordService(email, otp, password); // was: resetPassword(email, otp, password)
+    return resetPasswordService(email, otp, password);
   }
-
 
   return (
     <AuthContext.Provider
