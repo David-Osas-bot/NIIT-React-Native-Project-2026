@@ -1,7 +1,7 @@
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const PASSWORD_REGEX =
-  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#!$&^]).{8,}$/;
+// Requires: 8+ characters, at least one letter, at least one number
+export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
 export function isValidEmail(email) {
   return EMAIL_REGEX.test(email.trim());
