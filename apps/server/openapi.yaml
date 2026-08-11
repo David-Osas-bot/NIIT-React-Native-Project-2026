@@ -393,8 +393,7 @@ paths:
     post:
       summary: Request a password reset
       description: Sends a password reset link to the user's email address.
-      tags:
-        - Authentication
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -436,8 +435,7 @@ paths:
     post:
       summary: Reset password
       description: Resets the user's password using a valid password reset token.
-      tags:
-        - Authentication
+      tags: [Auth]
       parameters:
         - name: token
           in: path
