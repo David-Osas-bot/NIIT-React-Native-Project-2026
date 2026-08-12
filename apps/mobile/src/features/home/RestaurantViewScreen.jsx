@@ -18,7 +18,7 @@ import { styles } from './RestaurantViewScreen.styles';
 const { width } = Dimensions.get('window');
 
 // Add your own image paths here
-const restaurants = [
+const allRestaurants = [
   {
     id: '1',
     name: 'Spicy Restaurant',
@@ -93,15 +93,36 @@ export default function RestaurantViewScreen() {
   const route = useRoute();
   const { restaurantName } = route.params ?? {};
 
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState(null);
+  const flatListRef = useRef(null);
+
+  // Restaurants that actually match the applied filter (rating + delivery time)
+  const restaurants = appliedFilters
+    ? allRestaurants.filter((r) => {
+        const meetsRating = r.rating >= appliedFilters.rating;
+        const meetsTime = appliedFilters.deliverTime === '30 min'
+          ? true // 30 min is the loosest option, everything qualifies
+          : appliedFilters.deliverTime === '20 min'
+          ? parseInt(r.time) <= 20
+          : parseInt(r.time) <= 15; // '10-15 min'
+        return meetsRating && meetsTime;
+      })
+    : allRestaurants;
+
   const initialIndex = restaurantName
     ? Math.max(restaurants.findIndex((r) => r.name === restaurantName), 0)
     : 0;
 
   const [activeIndex, setActiveIndex] = useState(initialIndex);
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState(null);
-  const flatListRef = useRef(null);
+
+  // If the filtered list changes and activeIndex is now out of bounds, snap back to 0
+  useEffect(() => {
+    if (activeIndex >= restaurants.length) {
+      setActiveIndex(0);
+    }
+  }, [restaurants.length]);
 
   useEffect(() => {
     if (initialIndex > 0 && flatListRef.current) {
@@ -119,12 +140,32 @@ export default function RestaurantViewScreen() {
     }
   };
 
-  const filteredMenu = activeCategory
-    ? activeRestaurant.menu.filter((item) => item.name.toLowerCase().includes(activeCategory.toLowerCase()))
-    : activeRestaurant.menu;
+  const filteredMenu = activeRestaurant
+    ? activeCategory
+      ? activeRestaurant.menu.filter((item) => item.name.toLowerCase().includes(activeCategory.toLowerCase()))
+      : activeRestaurant.menu
+    : [];
 
-  // Does the currently-displayed restaurant meet the applied rating filter?
-  const meetsFilter = !appliedFilters || activeRestaurant.rating >= appliedFilters.rating;
+  if (!activeRestaurant) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.carouselWrapper}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={[styles.overlayButton, styles.backButton]}
+          >
+            <ChevronLeft size={20} color="#111827" />
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <Text style={styles.name}>No restaurants match your filter</Text>
+          <TouchableOpacity onPress={() => setAppliedFilters(null)} style={{ marginTop: 12 }}>
+            <Text style={{ color: '#F97316', fontWeight: '600' }}>Clear filter</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -168,6 +209,12 @@ export default function RestaurantViewScreen() {
           contentContainerStyle={styles.menuList}
           ListHeaderComponent={
             <>
+              {appliedFilters && (
+                <TouchableOpacity onPress={() => setAppliedFilters(null)} style={{ paddingHorizontal: 20, marginTop: 8 }}>
+                  <Text style={{ color: '#F97316', fontWeight: '600' }}>Clear filter ✕</Text>
+                </TouchableOpacity>
+              )}
+
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
                   <Star size={16} color="#F59E0B" fill="#F59E0B" />
@@ -185,12 +232,6 @@ export default function RestaurantViewScreen() {
 
               <Text style={styles.name}>{activeRestaurant.name}</Text>
               <Text style={styles.description}>{activeRestaurant.description}</Text>
-
-              {appliedFilters && !meetsFilter && (
-                <Text style={styles.filterWarning}>
-                  This restaurant is below your {appliedFilters.rating}+ star filter.
-                </Text>
-              )}
 
               <CategoryPillFilter
                 categories={activeRestaurant.categories}
