@@ -66,7 +66,10 @@ const MenuListScreen = () => {
       if (error.status === 401) {
         await clearToken();
         await AsyncStorage.removeItem('userData');
-        navigation.replace('Login');
+        navigation.getParent()?.reset({
+          index: 0,
+          routes: [{ name: 'Auth', params: { screen: 'Login' } }],
+        });
         return;
       }
       console.log('API fetch error:', error);
@@ -95,14 +98,14 @@ const MenuListScreen = () => {
       handleLogout();
       return;
     }
-    navigation.navigate(screenName, { userData });
+    navigation.navigate('MenuTab', { screen: screenName, params: { userData } });
   };
 
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('userData');
       await clearToken();
-      navigation.replace('Login');
+      navigation.navigate('Auth', { screen: 'Login' });
     } catch (error) {
       console.log('Logout error:', error);
     }
@@ -308,3 +311,6 @@ const MenuListScreen = () => {
 };
 
 export default MenuListScreen;
+
+
+
