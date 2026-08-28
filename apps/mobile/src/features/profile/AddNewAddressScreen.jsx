@@ -8,14 +8,29 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-// import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 // src/features/profile/ -> src/shared/ is 2 levels up.
 import { apiRequest } from '../../shared/api';
 import styles from './AddNewAddressScreen.styles';
+
+// react-native-maps is native-only — it has no web implementation, so
+// statically importing it crashes (or fails to bundle) when running on
+// Expo web (e.g. localhost:8081 in the browser). Load it conditionally so
+// native builds still get the real map, and web gets a safe fallback below.
+let MapView = null;
+let Marker = null;
+let PROVIDER_GOOGLE = null;
+if (Platform.OS !== 'web') {
+  // eslint-disable-next-line global-require
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+  PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
+}
 
 const AddNewAddressScreen = () => {
   const navigation = useNavigation();
@@ -204,26 +219,41 @@ const AddNewAddressScreen = () => {
         </View>
 
         <View style={styles.mapContainer}>
-          <MapView
-            ref={mapRef}
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            region={region}
-            onPress={handleMapPress}
-            showsUserLocation={true}
-            showsMyLocationButton={true}
-          >
-            <Marker
-              coordinate={selectedLocation}
-              draggable
-              onDragEnd={handleMarkerDragEnd}
-              pinColor="#FF6B35"
-            />
-          </MapView>
+          {MapView ? (
+            <>
+              <MapView
+                ref={mapRef}
+                provider={PROVIDER_GOOGLE}
+                style={styles.map}
+                region={region}
+                onPress={handleMapPress}
+                showsUserLocation={true}
+                showsMyLocationButton={true}
+              >
+                <Marker
+                  coordinate={selectedLocation}
+                  draggable
+                  onDragEnd={handleMarkerDragEnd}
+                  pinColor="#FF6B35"
+                />
+              </MapView>
 
-          <View style={styles.pinIndicator}>
-            <Feather name="map-pin" size={32} color="#FF6B35" />
-          </View>
+              <View style={styles.pinIndicator}>
+                <Feather name="map-pin" size={32} color="#FF6B35" />
+              </View>
+            </>
+          ) : (
+            // Web fallback: no native MapView available here. Show the
+            // detected/typed address and let the person fill the fields
+            // below manually instead of dragging a pin.
+            <View style={[styles.map, styles.mapWebFallback]}>
+              <Feather name="map-pin" size={28} color="#FF6B35" />
+              <Text style={styles.mapWebFallbackText}>
+                Map preview isn't available in the browser — use "locate me" or fill in the
+                address fields below.
+              </Text>
+            </View>
+          )}
 
           <TouchableOpacity
             style={styles.locateButton}

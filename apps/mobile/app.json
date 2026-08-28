@@ -7,7 +7,12 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "DFood uses your location to show nearby restaurants and estimate delivery times.",
+        "NSPhotoLibraryUsageDescription": "DFood needs access to your photo library so you can upload a profile picture or menu images.",
+        "NSCameraUsageDescription": "DFood needs access to your camera so you can take a photo for your profile or menu items."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -15,20 +20,32 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "expo": {
-      "ios": {
-        "infoPlist": {
-          "NSLocationWhenInUseUsageDescription": "DFood uses your location to show nearby restaurants and estimate delivery times."
-        }
-      }
-    },
     "plugins": [
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "DFood needs access to your photo library so you can upload a profile picture or menu images.",
+          "cameraPermission": "DFood needs access to your camera so you can take a photo for your profile or menu items."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "DFood uses your location to show nearby restaurants and estimate delivery times."
+        }
+      ]
     ]
   }
 }

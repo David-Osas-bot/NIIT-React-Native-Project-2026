@@ -34,6 +34,8 @@ export default function LoginScreen({ navigation }) {
     try {
       const data = await login(email, password);
 
+      console.log("LOGIN RESPONSE:", JSON.stringify(data));
+
       switch (data.user.role) {
         case "customer":
           navigation.replace("Location");

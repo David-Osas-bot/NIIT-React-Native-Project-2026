@@ -51,7 +51,7 @@ export default function SignupScreen({ navigation }) {
 
       switch (role) {
         case "customer":
-          navigation.replace("CustomerLogin");
+          navigation.replace("Login");
           break;
 
         case "driver":
